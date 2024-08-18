@@ -8,9 +8,5 @@ def login(identity: str, password: str):
 
 
 def auth_refresh(token):
-    res = request(
-        "collections/users/auth-refresh",
-        headers={"Authorization": token},
-        method="POST",
-    )
+    res = request("collections/users/auth-refresh", method="POST", auth_token=token)
     return res

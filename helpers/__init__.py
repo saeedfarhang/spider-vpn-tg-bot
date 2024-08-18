@@ -1,2 +1,2 @@
 from .request import request
-from .api import users, auth
+from .check_membership import check_membership
