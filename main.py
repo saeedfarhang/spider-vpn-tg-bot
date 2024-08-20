@@ -38,7 +38,7 @@ os.environ["https_proxy"] = HTTP_PROXY
 os.environ["HTTPS_PROXY"] = HTTP_PROXY
 
 # Your bot token
-TOKEN = "7148951379:AAH5hwNFVUiHgYsoxkixQSi12qn2YMl2Zrc"
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
