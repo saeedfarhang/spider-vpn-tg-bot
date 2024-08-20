@@ -24,7 +24,7 @@ from bot.buttons import (
     test_account_button,
 )
 from bot.state import HOME, SELECT_MAIN_ITEM
-from bot.messages import WELCOME
+from bot.messages import SELECT_PLAN, WELCOME
 from database.database_helper import get_or_create_user_token
 from helpers import check_membership
 from helpers.keyboards import build_keyboard, button_click
@@ -108,26 +108,14 @@ async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                         if plan["shown_price"]
                         else plan["common_name"]
                     ),
-                    callback_data={"type": "plan", "data": plan},
+                    callback_data={"type": "plan", "data": plan, "gateway": None},
                 ),
             ]
             for plan in plans
         ],
     ]
-    # + [
-    #     [
-    #         InlineKeyboardButton(
-    #             f"{plan['date_limit']} روزه",
-    #             callback_data={"type": "plan", "data": plan},
-    #         ),
-    #         InlineKeyboardButton(
-    #             plan["common_name"],
-    #             callback_data={"type": "plan", "data": plan},
-    #         ),
-    #     ]
-    #     for plan in plans
-    # ]
-    await build_keyboard(update, "test", reply_keyboard, False)
+
+    await build_keyboard(update, SELECT_PLAN, reply_keyboard, False)
 
 
 async def pricing(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

@@ -1,15 +1,49 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from api.users import get_user
 from database.database_helper import get_or_create_user_token
 from helpers import request
 
 
-def create_order(tg_user, plan_id):
-    user_token = get_or_create_user_token(tg_user)
-    user = get_user(tg_user.id, user_token)
-    print(user, user_token, tg_user.id, plan_id)
+async def create_order(update: Update, plan, selected_payment_gateway):
+    user_token = get_or_create_user_token(update.effective_chat)
+    user = get_user(update.effective_chat.id, user_token)
+    if selected_payment_gateway is None:
+        payment_gateways = get_gateway_payments()
+        for gw in payment_gateways:
+            if gw["default"]:
+                selected_payment_gateway = gw
+
+    if selected_payment_gateway is None:
+        keyboard = [
+            [
+                InlineKeyboardButton(
+                    "روش پرداخت",
+                    callback_data={"type": "blank"},
+                ),
+            ],
+            *[
+                [
+                    InlineKeyboardButton(
+                        f'{gateway["name"]}',
+                        callback_data={
+                            "type": "plan",
+                            "data": plan,
+                            "gateway": gateway,
+                        },
+                    ),
+                ]
+                for gateway in payment_gateways
+            ],
+        ]
+        await update.callback_query.edit_message_text(
+            "test",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+        )
+        return None
     order_data = {
         "user": user["id"],
-        "plan": plan_id,
+        "plan": plan["id"],
+        "payment_gateway": selected_payment_gateway["id"],
     }
     order = request(
         "collections/orders/records", order_data, "POST", auth_token=user_token
@@ -20,5 +54,12 @@ def create_order(tg_user, plan_id):
         method="GET",
         auth_token=user_token,
     )
-    print(payments)
-    return payments["items"]
+    return {"payments": payments["items"], "gateway": selected_payment_gateway}
+
+
+def get_gateway_payments() -> list:
+    gateways = request(
+        "collections/payment_gateway/records",
+        method="GET",
+    )
+    return gateways["items"]

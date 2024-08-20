@@ -2,7 +2,7 @@ from telegram import KeyboardButton
 
 
 def plan_button():
-    text = "پلن ها 🚀"
+    text = "خرید vpn 🚀"
     button = KeyboardButton(text)
     return [button, text]
 

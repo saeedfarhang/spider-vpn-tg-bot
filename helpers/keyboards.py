@@ -10,6 +10,7 @@ from telegram.ext import (
 )
 
 from api.orders import create_order
+from bot.messages import NO_VALID_PAYMENT_GATEWAY, WAIT_AFTER_BUTTON_CLICK
 
 
 async def build_keyboard(
@@ -32,31 +33,53 @@ async def build_keyboard(
 async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
+    await query.edit_message_text(WAIT_AFTER_BUTTON_CLICK)
     callback_type = query.data["type"]
-    if callback_type == "plan":
+    callback_data = None
+    if query.data:
         callback_data = query.data["data"]
-        payments = create_order(update.effective_chat, callback_data["id"])
-        print(payments)
-        keyboard = [
-            [
-                InlineKeyboardButton(
-                    "روش پرداخت",
-                    callback_data={"type": "blank"},
-                ),
-            ],
-            *[
+    if callback_type == "plan":
+        selected_payment_gateway = query.data["gateway"]
+        data = await create_order(update, callback_data, selected_payment_gateway)
+        if data and data["payments"]:
+            keyboard = [
                 [
                     InlineKeyboardButton(
-                        f'{payment["amount"]} {payment["currency"]}',
-                        callback_data={"type": "payment", "data": payment},
+                        "روش پرداخت",
+                        callback_data={"type": "blank"},
                     ),
-                ]
-                for payment in payments
-            ],
-        ]
-        await query.edit_message_text(
-            text="سفارش شما با موفقیت ثبت شد",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-        )
-        # if callback_data["name"] == "test_account":
-        #     print(callback_data["plan"])
+                ],
+                *[
+                    [
+                        InlineKeyboardButton(
+                            f'{payment["amount"]} {payment["currency"]}',
+                            callback_data={
+                                "type": "payment",
+                                "data": {
+                                    "payment": payment,
+                                    "gateway": data["gateway"],
+                                },
+                            },
+                        ),
+                    ]
+                    for payment in data["payments"]
+                ],
+            ]
+            await query.edit_message_text(
+                text="سفارش شما با موفقیت ثبت شد",
+                reply_markup=InlineKeyboardMarkup(keyboard),
+            )
+        elif data and data["payments"] == []:
+            await query.edit_message_text(
+                text=NO_VALID_PAYMENT_GATEWAY,
+            )
+    elif callback_type == "payment":
+        payment_gateway = callback_data["gateway"]
+        if payment_gateway["type"] == "ADMIN_APPROVE":
+            await update.message.reply_html(text=payment_gateway["data"])
+            await query.edit_message_text(text='payment_gateway["data"]')
+        elif payment_gateway["type"] == "PAYPING":
+            await query.edit_message_text(text=payment_gateway["url"])
+
+    elif callback_type == "blank":
+        pass
