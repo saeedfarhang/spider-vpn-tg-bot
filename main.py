@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 from telegram import (
@@ -25,6 +26,7 @@ from bot.buttons import (
 )
 from bot.state import HOME, SELECT_MAIN_ITEM, PAYMENT_APPROVE
 from bot.messages import SELECT_PLAN, WELCOME
+from bot.webhook import CustomContext, start_webhook_server
 from database.database_helper import get_or_create_user_token
 from helpers import check_membership
 from helpers.keyboards import approve_pending_photo, build_keyboard, button_click
@@ -149,14 +151,18 @@ async def set_commands(application: Application) -> None:
 
 def main() -> None:
     """Run the bot."""
+    context_types = ContextTypes(context=CustomContext)
     # Create the Application and pass it your bot's token.
     application = (
         Application.builder()
         .token(TOKEN)
+        .context_types(context_types)
         .post_init(set_commands)
         .arbitrary_callback_data(True)
         .build()
     )
+    asyncio.run(start_webhook_server(application))
+
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
