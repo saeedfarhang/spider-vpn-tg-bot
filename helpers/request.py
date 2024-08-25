@@ -5,6 +5,7 @@ import requests
 def request(
     endpoint: str,
     params: dict = None,
+    files: dict = None,
     method: str = "GET",
     headers: dict = {"content-type": "application/json"},
     auth_token: str = None,
@@ -20,6 +21,15 @@ def request(
         if method == "GET":
             response = requests.get(
                 url, params=params, timeout=6, headers=headers_with_auth
+            )
+        elif method == "POST" and files:
+            response = requests.request(
+                "POST",
+                url,
+                headers=headers_with_auth,
+                data=params,
+                files=files,
+                timeout=10,
             )
         elif method == "POST":
             response = requests.post(

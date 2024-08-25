@@ -3,7 +3,9 @@ from helpers import request
 
 def login(identity: str, password: str):
     auth_data = {"identity": identity, "password": password}
-    res = request("collections/users/auth-with-password", auth_data, "POST")
+    res = request(
+        "collections/users/auth-with-password", params=auth_data, method="POST"
+    )
     return res
 
 

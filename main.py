@@ -23,11 +23,11 @@ from bot.buttons import (
     support_button,
     test_account_button,
 )
-from bot.state import HOME, SELECT_MAIN_ITEM
+from bot.state import HOME, SELECT_MAIN_ITEM, PAYMENT_APPROVE
 from bot.messages import SELECT_PLAN, WELCOME
 from database.database_helper import get_or_create_user_token
 from helpers import check_membership
-from helpers.keyboards import build_keyboard, button_click
+from helpers.keyboards import approve_pending_photo, build_keyboard, button_click
 
 # Proxy settings (if needed)
 HTTP_PROXY = "http://0.0.0.0:20171"
@@ -47,13 +47,15 @@ logger = logging.getLogger(__name__)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    if not await check_membership(update, context, "@codinguys"):
-        await update.message.reply_text(
-            "You must join our channel to use this bot. Please join @codinguys and then type /start again."
-        )
-        return ConversationHandler.END
-    """Starts the conversation and asks the user about their gender."""
-    user_token = get_or_create_user_token(update.effective_chat)
+    SPONSORED_CHANNELS = os.environ.get("SPONSORED_CHANNELS", None).split(",")
+    USER_ADMIN_IDS = os.environ.get("USER_ADMIN_IDS", None).split(",")
+    for channel_id in SPONSORED_CHANNELS:
+        if channel_id and not await check_membership(update, context, channel_id):
+            await update.message.reply_text(
+                f"You must join our channel to use this bot. Please join {channel_id} and then type /start again."
+            )
+            return ConversationHandler.END
+    user_token = get_or_create_user_token(update.effective_chat, USER_ADMIN_IDS)
     logger.info("User retrieved. api token: %s", user_token)
     reply_keyboard = [
         [
@@ -149,10 +151,12 @@ def main() -> None:
     """Run the bot."""
     # Create the Application and pass it your bot's token.
     application = (
-        Application.builder().token(TOKEN).arbitrary_callback_data(True).build()
+        Application.builder()
+        .token(TOKEN)
+        .post_init(set_commands)
+        .arbitrary_callback_data(True)
+        .build()
     )
-    application.job_queue.run_once(set_commands, 0)
-    # Add conversation handler with the states GENDER, PHOTO, LOCATION and BIO
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -175,6 +179,7 @@ def main() -> None:
         fallbacks=[CommandHandler("start", start)],
     )
     # Add start command handler
+    application.add_handler(MessageHandler(filters.PHOTO, approve_pending_photo))
     application.add_handler(CommandHandler("menu", start))
     application.add_handler(conv_handler)
     application.add_handler(CallbackQueryHandler(button_click))

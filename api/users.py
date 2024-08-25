@@ -35,7 +35,7 @@ def get_create_user_token(tg_user: User | None) -> str:
             "password": "test12332232test",
             "passwordConfirm": "test12332232test",
         }
-        request("collections/users/records/", user_data, "POST")
+        request("collections/users/records/", params=user_data, method="POST")
         token = login(str(tg_user.id), "test12332232test")
 
     return token["token"]

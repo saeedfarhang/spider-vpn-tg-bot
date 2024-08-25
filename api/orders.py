@@ -46,7 +46,10 @@ async def create_order(update: Update, plan, selected_payment_gateway):
         "payment_gateway": selected_payment_gateway["id"],
     }
     order = request(
-        "collections/orders/records", order_data, "POST", auth_token=user_token
+        "collections/orders/records",
+        params=order_data,
+        method="POST",
+        auth_token=user_token,
     )
 
     payments = request(
@@ -54,7 +57,17 @@ async def create_order(update: Update, plan, selected_payment_gateway):
         method="GET",
         auth_token=user_token,
     )
-    return {"payments": payments["items"], "gateway": selected_payment_gateway}
+    return {
+        "payments": payments["items"],
+        "gateway": selected_payment_gateway,
+        "order": order,
+    }
+
+
+def get_order_by_order_id(order_id: str, user_token):
+    return request(
+        "collections/orders/records/" + order_id, "GET", auth_token=user_token
+    )
 
 
 def get_gateway_payments() -> list:

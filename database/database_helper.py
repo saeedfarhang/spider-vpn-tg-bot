@@ -15,7 +15,8 @@ def create_table():
         CREATE TABLE IF NOT EXISTS user_tokens (
             tg_user_id STRING PRIMARY KEY,
             token TEXT,
-            updated_at DATETIME
+            updated_at DATETIME,
+            is_admin BOOLEAN DEFAULT 0
         )
     """
     )
@@ -54,7 +55,7 @@ def set_user_token(tg_user: User, token: str):
     return token
 
 
-def get_or_create_user_token(tg_user: User | None):
+def get_or_create_user_token(tg_user: User | None, USER_ADMIN_IDS: list = None):
     """
     Retrieves an existing user token from the database based on the Telegram user ID
     or creates a new token if it does not exist, handling token replacement if `updated_at`
@@ -76,10 +77,16 @@ def get_or_create_user_token(tg_user: User | None):
         else:
             c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user.id,))
 
+    is_admin = tg_user.id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
     token = get_create_user_token(tg_user)
     c.execute(
-        "INSERT INTO user_tokens (tg_user_id, token, updated_at) VALUES (?, ?, ?)",
-        (tg_user.id, token, current_time.isoformat()),  # Store as ISO format string
+        "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
+        (
+            tg_user.id,
+            token,
+            current_time.isoformat(),
+            is_admin,
+        ),  # Store as ISO format string
     )
     conn.commit()
     conn.close()
