@@ -1,5 +1,4 @@
 from telegram import (
-    Bot,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
@@ -8,7 +7,7 @@ from telegram import (
 from telegram.ext import (
     ContextTypes,
 )
-
+from telegram.constants import ParseMode
 from api.order_approval import create_order_approval
 from api.orders import create_order, get_order_by_order_id
 from bot.messages import (
@@ -16,7 +15,6 @@ from bot.messages import (
     WAIT_AFTER_BUTTON_CLICK,
     WAIT_FOR_APPROVE,
 )
-from bot.state import PAYMENT_APPROVE
 from database.database_helper import get_or_create_user_token
 
 
@@ -68,43 +66,53 @@ async def button_click(update: Update, context: ContextTypes.DEFAULT_TYPE):
         context.user_data["order_id"] = order_id
 
         if data and data["payments"]:
-            keyboard = [
-                [
-                    InlineKeyboardButton(
-                        "روش پرداخت",
-                        callback_data={"type": "blank"},
-                    ),
-                ],
-                *[
+            if data["gateway"]["type"] == "FREE":
+                await query.edit_message_text(
+                    text=data["gateway"]["data"], parse_mode=ParseMode.MARKDOWN
+                )
+            else:
+                keyboard = [
                     [
                         InlineKeyboardButton(
-                            f'{payment["amount"]} {payment["currency"]}',
-                            callback_data={
-                                "type": "payment",
-                                "data": {
-                                    "payment": payment,
-                                    "gateway": data["gateway"],
-                                },
-                            },
+                            "روش پرداخت",
+                            callback_data={"type": "blank"},
                         ),
-                    ]
-                    for payment in data["payments"]
-                ],
-            ]
+                    ],
+                    *[
+                        [
+                            InlineKeyboardButton(
+                                f'{payment["amount"]} {payment["currency"]}',
+                                callback_data={
+                                    "type": "payment",
+                                    "data": {
+                                        "payment": payment,
+                                        "gateway": data["gateway"],
+                                    },
+                                },
+                            ),
+                        ]
+                        for payment in data["payments"]
+                    ],
+                ]
             await query.edit_message_text(
                 text="سفارش شما با موفقیت ثبت شد",
                 reply_markup=InlineKeyboardMarkup(keyboard),
             )
+
         elif data and data["payments"] == []:
             await query.edit_message_text(
                 text=NO_VALID_PAYMENT_GATEWAY,
             )
     elif callback_type == "payment":
         payment_gateway = callback_data["gateway"]
-        if payment_gateway["type"] == "ADMIN_APPROVE":
-            await update.callback_query.message.reply_text(
+        if payment_gateway["type"] == "FREE":
+            await query.edit_message_text(
                 text=payment_gateway["data"], parse_mode="Html"
             )
+        if payment_gateway["type"] == "ADMIN_APPROVE":
+            # await update.callback_query.message.reply_text(
+            #     text=payment_gateway["data"], parse_mode="Html"
+            # )
             await query.edit_message_text(
                 text=payment_gateway["data"], parse_mode="Html"
             )

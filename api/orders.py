@@ -8,11 +8,10 @@ async def create_order(update: Update, plan, selected_payment_gateway):
     user_token = get_or_create_user_token(update.effective_chat.id)
     user = get_user(update.effective_chat.id, user_token)
     if selected_payment_gateway is None:
-        payment_gateways = get_gateway_payments()
+        payment_gateways = get_gateway_payments(plan["id"])
         for gw in payment_gateways:
             if gw["default"]:
                 selected_payment_gateway = gw
-
     if selected_payment_gateway is None:
         keyboard = [
             [
@@ -51,7 +50,6 @@ async def create_order(update: Update, plan, selected_payment_gateway):
         method="POST",
         auth_token=user_token,
     )
-
     payments = request(
         f"collections/payments/records?filter=(order='{order['id']}')",
         method="GET",
@@ -70,9 +68,9 @@ def get_order_by_order_id(order_id: str, user_token):
     )
 
 
-def get_gateway_payments() -> list:
+def get_gateway_payments(plan_id) -> list:
     gateways = request(
-        "collections/payment_gateway/records",
+        f"collections/payment_gateway/records?expand=plans_pricing_via_gateway&filter=(plans_pricing_via_gateway.plan='{plan_id}')",
         method="GET",
     )
     return gateways["items"]
