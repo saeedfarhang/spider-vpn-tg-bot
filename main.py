@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import os
 from telegram import (
@@ -16,6 +15,7 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 from api.plans import get_plans
+from api.vpn_configs import get_vpn_config_by_id
 from bot.buttons import (
     home_button,
     my_account_button,
@@ -24,12 +24,15 @@ from bot.buttons import (
     support_button,
     test_account_button,
 )
-from bot.state import HOME, SELECT_MAIN_ITEM, PAYMENT_APPROVE
+from bot.state import HOME, SELECT_MAIN_ITEM
 from bot.messages import SELECT_PLAN, WELCOME
-from bot.webhook import CustomContext, start_webhook_server
+from bot.utils import send_vpn_config_to_user
+from bot.webhook import CustomContext
 from database.database_helper import get_or_create_user_token
 from helpers import check_membership
 from helpers.keyboards import approve_pending_photo, build_keyboard, button_click
+from flask import Flask, request
+from threading import Thread
 
 # Proxy settings (if needed)
 HTTP_PROXY = "http://0.0.0.0:20171"
@@ -46,6 +49,11 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
+app = Flask(__name__)
+
+
+def run_webserver():
+    app.run(host="localhost", port=8009)
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -57,7 +65,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
                 f"You must join our channel to use this bot. Please join {channel_id} and then type /start again."
             )
             return ConversationHandler.END
-    user_token = get_or_create_user_token(update.effective_chat, USER_ADMIN_IDS)
+    user_token = get_or_create_user_token(update.effective_chat.id, USER_ADMIN_IDS)
     logger.info("User retrieved. api token: %s", user_token)
     reply_keyboard = [
         [
@@ -151,17 +159,32 @@ async def set_commands(application: Application) -> None:
 
 def main() -> None:
     """Run the bot."""
-    context_types = ContextTypes(context=CustomContext)
     # Create the Application and pass it your bot's token.
+    # context_types = ContextTypes(context=CustomContext)
     application = (
         Application.builder()
         .token(TOKEN)
-        .context_types(context_types)
         .post_init(set_commands)
+        # .context_types(context_types)
         .arbitrary_callback_data(True)
         .build()
     )
-    asyncio.run(start_webhook_server(application))
+
+    @app.route("/trigger-vpn-config")
+    async def handle_request():
+        user_id = request.args.get("user_id")
+        config_id = request.args.get("config_id")
+        user_token = get_or_create_user_token(user_id)
+        if user_id and config_id:
+            vpn_config = get_vpn_config_by_id(user_token, config_id)
+            await send_vpn_config_to_user(application, user_id, vpn_config)
+            return "Message sent to user", 200
+        return "User ID or Config ID not provided", 400
+
+    # Start the web server in a separate thread
+    web_server_thread = Thread(target=run_webserver)
+    web_server_thread.daemon = True
+    web_server_thread.start()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],

@@ -20,7 +20,7 @@ def request(
     try:
         if method == "GET":
             response = requests.get(
-                url, params=params, timeout=6, headers=headers_with_auth
+                url, params=params, timeout=20, headers=headers_with_auth
             )
         elif method == "POST" and files:
             response = requests.request(
@@ -29,11 +29,11 @@ def request(
                 headers=headers_with_auth,
                 data=params,
                 files=files,
-                timeout=10,
+                timeout=20,
             )
         elif method == "POST":
             response = requests.post(
-                url, json=params, timeout=6, headers=headers_with_auth
+                url, json=params, timeout=20, headers=headers_with_auth
             )
         else:
             raise ValueError("Unsupported HTTP method")
