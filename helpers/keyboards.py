@@ -42,7 +42,7 @@ async def approve_pending_photo(update: Update, context: ContextTypes.DEFAULT_TY
     photo_path = f"tmp/order_approval/{photo_file.file_unique_id}.jpg"
     await photo_file.download_to_drive(photo_path)
 
-    user_token = get_or_create_user_token(update.effective_chat)
+    user_token = get_or_create_user_token(update.effective_chat.id)
     if order_id := context.user_data.get("order_id"):
         get_order_by_order_id(order_id, user_token)
         await create_order_approval(photo_path, order_id, user_token)

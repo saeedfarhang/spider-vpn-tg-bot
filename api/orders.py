@@ -5,7 +5,7 @@ from helpers import request
 
 
 async def create_order(update: Update, plan, selected_payment_gateway):
-    user_token = get_or_create_user_token(update.effective_chat)
+    user_token = get_or_create_user_token(update.effective_chat.id)
     user = get_user(update.effective_chat.id, user_token)
     if selected_payment_gateway is None:
         payment_gateways = get_gateway_payments()

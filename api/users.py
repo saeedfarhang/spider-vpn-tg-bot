@@ -16,7 +16,7 @@ def get_user(tg_id: str, auth_token: str):
         return search_users["items"][0] if len(search_users["items"]) else None
 
 
-def get_create_user_token(tg_user: User | None) -> str:
+def get_create_user_token(tg_user_id: str) -> str:
     """
     This function retrieves or creates a user token based on a Telegram user's information.
 
@@ -25,17 +25,17 @@ def get_create_user_token(tg_user: User | None) -> str:
     :return: The function `get_create_user_token` returns the authentication token retrieved from the
     login process for the given Telegram user (`tg_user`).
     """
-    if token := login(str(tg_user.id), "test12332232test"):
+    if token := login(str(tg_user_id), "test12332232test"):
         logger.info("token retrieves by login")
     else:
         user_data = {
-            "username": tg_user.id,
-            "tg_id": tg_user.id,
-            "tg_username": tg_user.username,
+            "username": tg_user_id,
+            "tg_id": tg_user_id,
+            "tg_username": tg_user_id,
             "password": "test12332232test",
             "passwordConfirm": "test12332232test",
         }
         request("collections/users/records/", params=user_data, method="POST")
-        token = login(str(tg_user.id), "test12332232test")
+        token = login(str(tg_user_id), "test12332232test")
 
     return token["token"]

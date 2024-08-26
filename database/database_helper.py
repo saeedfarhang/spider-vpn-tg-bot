@@ -55,7 +55,7 @@ def set_user_token(tg_user: User, token: str):
     return token
 
 
-def get_or_create_user_token(tg_user: User | None, USER_ADMIN_IDS: list = None):
+def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
     """
     Retrieves an existing user token from the database based on the Telegram user ID
     or creates a new token if it does not exist, handling token replacement if `updated_at`
@@ -66,7 +66,7 @@ def get_or_create_user_token(tg_user: User | None, USER_ADMIN_IDS: list = None):
     current_time = datetime.now()  # Use datetime object directly for time comparisons
 
     c.execute(
-        "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?", (tg_user.id,)
+        "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,)
     )
     result = c.fetchone()
     if result:
@@ -75,14 +75,14 @@ def get_or_create_user_token(tg_user: User | None, USER_ADMIN_IDS: list = None):
         if time_diff.total_seconds() <= 7200:
             return result[0]
         else:
-            c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user.id,))
+            c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,))
 
-    is_admin = tg_user.id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
-    token = get_create_user_token(tg_user)
+    is_admin = tg_user_id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
+    token = get_create_user_token(tg_user_id)
     c.execute(
         "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
         (
-            tg_user.id,
+            tg_user_id,
             token,
             current_time.isoformat(),
             is_admin,
