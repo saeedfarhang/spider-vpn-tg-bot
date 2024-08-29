@@ -7,38 +7,6 @@ from helpers import request
 async def create_order(update: Update, plan, selected_payment_gateway):
     user_token = get_or_create_user_token(update.effective_chat.id)
     user = get_user(update.effective_chat.id, user_token)
-    if selected_payment_gateway is None:
-        payment_gateways = get_gateway_payments(plan["id"])
-        for gw in payment_gateways:
-            if gw["default"]:
-                selected_payment_gateway = gw
-    if selected_payment_gateway is None:
-        keyboard = [
-            [
-                InlineKeyboardButton(
-                    "روش پرداخت",
-                    callback_data={"type": "blank"},
-                ),
-            ],
-            *[
-                [
-                    InlineKeyboardButton(
-                        f'{gateway["name"]}',
-                        callback_data={
-                            "type": "plan",
-                            "data": plan,
-                            "gateway": gateway,
-                        },
-                    ),
-                ]
-                for gateway in payment_gateways
-            ],
-        ]
-        await update.callback_query.edit_message_text(
-            "test",
-            reply_markup=InlineKeyboardMarkup(keyboard),
-        )
-        return None
     order_data = {
         "user": user["id"],
         "plan": plan["id"],
@@ -50,22 +18,34 @@ async def create_order(update: Update, plan, selected_payment_gateway):
         method="POST",
         auth_token=user_token,
     )
-    payments = request(
-        f"collections/payments/records?filter=(order='{order['id']}')",
-        method="GET",
+    if order is not None:
+        payments = request(
+            f"collections/payments/records?filter=(order='{order['id']}')",
+            method="GET",
+            auth_token=user_token,
+        )
+        return {
+            "payments": payments["items"],
+            "gateway": selected_payment_gateway,
+            "order": order,
+        }
+    return None
+
+
+def get_order_by_id(order_id: str, user_token):
+    return request(
+        "collections/orders/records/" + order_id + "&expand=vpn_config",
         auth_token=user_token,
     )
-    return {
-        "payments": payments["items"],
-        "gateway": selected_payment_gateway,
-        "order": order,
-    }
 
 
-def get_order_by_order_id(order_id: str, user_token):
-    return request(
-        "collections/orders/records/" + order_id, "GET", auth_token=user_token
+def get_my_orders_by_status(status: str, user_token):
+    res = request(
+        f"collections/orders/records?filter=(status='{status}')&expand=vpn_config",
+        "GET",
+        auth_token=user_token,
     )
+    return res.get("items", [])
 
 
 def get_gateway_payments(plan_id) -> list:
