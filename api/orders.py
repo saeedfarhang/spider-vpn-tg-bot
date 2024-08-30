@@ -34,7 +34,7 @@ async def create_order(update: Update, plan, selected_payment_gateway):
 
 def get_order_by_id(order_id: str, user_token):
     return request(
-        "collections/orders/records/" + order_id + "&expand=vpn_config",
+        "collections/orders/records/" + order_id + "?expand=vpn_config",
         auth_token=user_token,
     )
 

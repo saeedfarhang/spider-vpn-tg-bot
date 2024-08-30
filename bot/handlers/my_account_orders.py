@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 from api.orders import get_my_orders_by_status
 from bot.messages import MY_ACCOUNT_ORDERS
 from database.database_helper import get_or_create_user_token
-from helpers.keyboards import build_keyboard
+from helpers import build_keyboard
 
 
 async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -12,7 +12,6 @@ async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_token = get_or_create_user_token(user.id)
 
     orders = get_my_orders_by_status("COMPLETE", user_token)
-    print(orders[0])
     reply_keyboard = [
         [
             InlineKeyboardButton(
@@ -35,6 +34,7 @@ async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     callback_data={
                         "type": "order",
                         "data": order,
+                        "show_keyboard": True,
                     },
                 ),
             ]

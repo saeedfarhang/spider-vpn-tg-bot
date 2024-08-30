@@ -13,10 +13,16 @@ def request(
     """Call the backend API and return the response."""
     base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
     url = f"{base_url}/{endpoint}"
-    headers_with_auth = {
-        **headers,
-        "Authorization": auth_token,
-    }
+    if auth_token:
+        headers_with_auth = {
+            **headers,
+            "Authorization": f"Bearer {auth_token}",
+        }
+    else:
+        headers_with_auth = {
+            **headers,
+            "Authorization": None,
+        }
     try:
         if method == "GET":
             response = requests.get(

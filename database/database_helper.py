@@ -5,6 +5,9 @@ from telegram import User
 
 from api.auth import auth_refresh
 from api.users import get_create_user_token
+from helpers import logger
+
+logger = logger(__name__)
 
 
 def create_table():
@@ -64,10 +67,20 @@ def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
     conn = sqlite3.connect("user_tokens.db")
     c = conn.cursor()
     current_time = datetime.now()  # Use datetime object directly for time comparisons
-
-    c.execute(
-        "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,)
-    )
+    try:
+        c.execute(
+            "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?",
+            (tg_user_id,),
+        )
+    except Exception as e:
+        logger.error("Error: %s", e)
+        conn.close()
+        conn = sqlite3.connect("user_tokens.db")
+        c = conn.cursor()
+        c.execute(
+            "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?",
+            (tg_user_id,),
+        )
     result = c.fetchone()
     if result:
         last_updated = datetime.fromisoformat(result[1])  # Parse using fromisoformat
@@ -79,16 +92,26 @@ def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
 
     is_admin = tg_user_id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
     token = get_create_user_token(tg_user_id)
-    c.execute(
-        "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
-        (
-            tg_user_id,
-            token,
-            current_time.isoformat(),
-            is_admin,
-        ),  # Store as ISO format string
-    )
-    conn.commit()
+    try:
+        c.execute(
+            "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
+            (
+                tg_user_id,
+                token,
+                current_time.isoformat(),
+                is_admin,
+            ),  # Store as ISO format string
+        )
+        conn.commit()
+    except Exception:
+        conn.close()
+        conn = sqlite3.connect("user_tokens.db")
+        c = conn.cursor()
+        c.execute(
+            "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?",
+            (tg_user_id,),
+        )
+
     conn.close()
     return token
 

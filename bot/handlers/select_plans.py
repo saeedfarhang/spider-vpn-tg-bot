@@ -3,7 +3,7 @@ from telegram.ext import ContextTypes
 
 from api.plans import get_plans
 from bot.messages import SELECT_PLAN
-from helpers.keyboards import build_keyboard
+from helpers import build_keyboard
 
 
 async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:

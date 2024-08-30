@@ -16,5 +16,5 @@ def outline_config_json_to_str(text: str, order_data: dict):
     except Exception as e:
         print(f"Error retrieving  {e}")
 
-    persian_text = f"{text}\nلینک اتصال:\n[{access_url}]({access_url})\nاشتراک:\n{name}\n\nتاریخ شروع:\n{start_date}\nتاریخ پایان:\n{end_date}\nحجم اشتراک: {usage_in_gb} گیگابایت"
+    persian_text = f"{text}\n🔗 لینک اتصال:\n\n\t\t\t\t\t[{access_url}]({access_url})\n\n🎫 اشتراک: {name}\n📅 تاریخ شروع:\n{start_date}\n⏳ تاریخ پایان:\n{end_date}\n📊 حجم اشتراک: {usage_in_gb} گیگابایت"
     return persian_text

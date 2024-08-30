@@ -26,11 +26,14 @@ from bot.buttons import (
 from bot.handlers import my_account_orders, select_plans
 from bot.state import HOME, SELECT_MAIN_ITEM
 from bot.utils import (
+    approve_pending_photo,
     send_duplicate_test_account_message_to_user,
+    send_vpn_config_deprecated_notification_to_user,
+    send_vpn_config_expiry_notification_to_user,
     send_vpn_config_to_user,
 )
 from database.database_helper import get_or_create_user_token
-from helpers.keyboards import approve_pending_photo, button_click_callback
+from helpers.keyboards import button_click_callback
 from flask import Flask, request
 from threading import Thread
 from helpers import logger
@@ -89,20 +92,60 @@ def main() -> None:
         .build()
     )
 
-    @app.route("/trigger-vpn-config")
-    async def handle_request():
+    @app.route("/deprecated-vpn-config")
+    async def deprecated_vpn_config():
         user_id = request.args.get("user_id")
         order_id = request.args.get("order_id")
-        user_token = get_or_create_user_token(user_id)
-        logger.info(
-            "duplicate test account webhook triggered. user_id: %s, order_id: %s",
-            user_id,
-            order_id,
-        )
+
+        if user_id and order_id:
+            logger.info(
+                "deprecated order triggered. user_id: %s, order_id: %s",
+                user_id,
+                order_id,
+            )
+            await send_vpn_config_deprecated_notification_to_user(
+                application, user_id, order_id
+            )
+            return "Message sent to user", 200
+        return "User ID or Config ID not provided", 400
+
+    @app.route("/expiry-vpn-config")
+    async def expiry_vpn_config():
+        user_id = request.args.get("user_id")
+        order_id = request.args.get("order_id")
+        days_to_expire = int(request.args.get("days_to_expire", "0"))
+
+        if user_id and order_id:
+            logger.info(
+                "new order triggered. user_id: %s, order_id: %s",
+                user_id,
+                order_id,
+            )
+            await send_vpn_config_expiry_notification_to_user(
+                application, user_id, order_id, days_to_expire
+            )
+            return "Message sent to user", 200
+        return "User ID or Config ID not provided", 400
+
+    @app.route("/trigger-vpn-config")
+    async def vpn_config_request():
+        user_id = request.args.get("user_id")
+        order_id = request.args.get("order_id")
         if user_id and order_id:
             if order_id == "Nil":
+                logger.info(
+                    "duplicate test account webhook triggered. user_id: %s, order_id: %s",
+                    user_id,
+                    order_id,
+                )
                 await send_duplicate_test_account_message_to_user(application, user_id)
                 return "Message sent to user", 200
+            logger.info(
+                "new order triggered. user_id: %s, order_id: %s",
+                user_id,
+                order_id,
+            )
+            user_token = get_or_create_user_token(user_id)
             order = get_order_by_id(order_id, user_token)
             await send_vpn_config_to_user(application, user_id, order)
             return "Message sent to user", 200
