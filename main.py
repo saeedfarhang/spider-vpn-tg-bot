@@ -41,12 +41,12 @@ from threading import Thread
 from helpers import logger
 
 # # Proxy settings (if needed)
-HTTP_PROXY = "http://0.0.0.0:20171"
-os.environ["no_proxy"] = "127.0.0.1,localhost"
-os.environ["http_proxy"] = HTTP_PROXY
-os.environ["HTTP_PROXY"] = HTTP_PROXY
-os.environ["https_proxy"] = HTTP_PROXY
-os.environ["HTTPS_PROXY"] = HTTP_PROXY
+# HTTP_PROXY = "http://0.0.0.0:20171"
+# os.environ["no_proxy"] = "127.0.0.1,localhost"
+# os.environ["http_proxy"] = HTTP_PROXY
+# os.environ["HTTP_PROXY"] = HTTP_PROXY
+# os.environ["https_proxy"] = HTTP_PROXY
+# os.environ["HTTPS_PROXY"] = HTTP_PROXY
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
