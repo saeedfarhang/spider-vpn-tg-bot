@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  app:
+  spider-tg-bot:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,7 +9,13 @@ services:
       - .env
     ports:
       - "8009:8009"
+    networks:
+      - spider-vpn-network
     environment:
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
 
+
+networks:
+  spider-vpn-network:
+    external: true
