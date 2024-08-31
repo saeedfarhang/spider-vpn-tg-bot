@@ -30,7 +30,7 @@ WORKDIR /app
 
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app /app
-COPY --from=builder /app/.env /app/,env
+COPY --from=builder /app/.env /app/.env
 
 
 COPY --from=builder /root/.local /root/.local

@@ -8,7 +8,7 @@ services:
     env_file:
       - .env
     ports:
-      - "8009:8009"
+      - "8009:8009" 
     networks:
       - spider-vpn-network
     environment:
