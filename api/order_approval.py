@@ -3,7 +3,7 @@ from telegram import File
 from helpers import request
 
 
-async def create_order_approval(photo_path: str, order: str, auth_token=str):
+async def create_order_approval(photo_path: str, order: str, user_id=str):
     data = {"order": order}
     files = [
         (
@@ -24,5 +24,5 @@ async def create_order_approval(photo_path: str, order: str, auth_token=str):
         files=files,
         headers={},
         method="POST",
-        auth_token=auth_token,
+        user_id=user_id,
     )

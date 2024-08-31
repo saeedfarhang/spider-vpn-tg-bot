@@ -5,8 +5,8 @@ from helpers import request
 
 
 async def create_order(update: Update, plan, selected_payment_gateway):
-    user_token = get_or_create_user_token(update.effective_chat.id)
-    user = get_user(update.effective_chat.id, user_token)
+    user_id = update.effective_chat.id
+    user = get_user(update.effective_chat.id, user_id)
     order_data = {
         "user": user["id"],
         "plan": plan["id"],
@@ -16,13 +16,13 @@ async def create_order(update: Update, plan, selected_payment_gateway):
         "collections/orders/records",
         params=order_data,
         method="POST",
-        auth_token=user_token,
+        user_id=user_id,
     )
     if order is not None:
         payments = request(
             f"collections/payments/records?filter=(order='{order['id']}')",
             method="GET",
-            auth_token=user_token,
+            user_id=user_id,
         )
         return {
             "payments": payments["items"],
@@ -32,18 +32,18 @@ async def create_order(update: Update, plan, selected_payment_gateway):
     return None
 
 
-def get_order_by_id(order_id: str, user_token):
+def get_order_by_id(order_id: str, user_id):
     return request(
         "collections/orders/records/" + order_id + "?expand=vpn_config",
-        auth_token=user_token,
+        user_id=user_id,
     )
 
 
-def get_my_orders_by_status(status: str, user_token):
+def get_my_orders_by_status(status: str, user_id):
     res = request(
         f"collections/orders/records?filter=(status='{status}')&expand=vpn_config",
         "GET",
-        auth_token=user_token,
+        user_id=user_id,
     )
     return res.get("items", [])
 

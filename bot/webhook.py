@@ -1,15 +1,10 @@
-from telegram.ext import (
-    Application,
-    CallbackContext,
-    ExtBot,
-)
+import os
+from flask import Flask
+
+app = Flask(__name__)
 
 
-class CustomContext(CallbackContext[ExtBot, dict, dict, dict]):
-    @classmethod
-    def from_update(
-        cls,
-        update: object,
-        application: "Application",
-    ) -> "CustomContext":
-        return super().from_update(update, application)
+def run_webserver():
+    host = os.environ.get("WEBHOOK_HOST", "localhost")
+    port = str(os.environ.get("WEBHOOK_PORT", 5000))
+    app.run(host=host, port=port)

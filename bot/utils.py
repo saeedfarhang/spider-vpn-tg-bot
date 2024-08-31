@@ -1,21 +1,18 @@
 import logging
-
 from telegram import Update
 from api.order_approval import create_order_approval
 from api.orders import get_order_by_id
 from bot.messages import (
     COMPLETE_ORDER_HEAD_TEXT,
     DUPLICATE_TEST_ACCOUNT,
+    EXPIRY_NOTIFICATION,
     ORDER_CREATED_WITHOUT_DATA,
     WAIT_FOR_APPROVE,
 )
-from database.database_helper import get_or_create_user_token
 from helpers.json_to_str import outline_config_json_to_str
 from telegram.ext import Application
 from telegram.constants import ParseMode
-from telegram import (
-    Update,
-)
+
 from telegram.ext import (
     ContextTypes,
 )
@@ -43,25 +40,36 @@ async def send_vpn_config_to_user(application: Application, user_id, order):
     except Exception as e:
         logger.error("Failed to send message: %s", e)
         await application.bot.send_message(
-            chat_id=user_id, text=ORDER_CREATED_WITHOUT_DATA, parse_mode=ParseMode.HTML
+            chat_id=user_id,
+            text=ORDER_CREATED_WITHOUT_DATA,
+            parse_mode=ParseMode.MARKDOWN,
         )
 
 
+async def send_request_error_notification_to_user(
+    application: Application, user_id: int, status: int
+):
+    await application.bot.send_message(
+        chat_id=user_id, text="connection_data_str", parse_mode=ParseMode.MARKDOWN
+    )
+
+
 async def send_vpn_config_expiry_notification_to_user(
-    application: Application, user_id, order_id: str, days_to_expire: int
+    application: Application,
+    user_id,
+    order_id: str,
+    hours_to_expire: int,
+    remain_in_mb: int,
 ):
     try:
 
         await application.bot.send_message(
-            chat_id=user_id, text="test", parse_mode=ParseMode.HTML
+            chat_id=user_id,
+            text=EXPIRY_NOTIFICATION.format(order_id, hours_to_expire, remain_in_mb),
+            parse_mode=ParseMode.MARKDOWN,
         )
     except Exception as e:
         logger.error("Failed to send message: %s", e)
-        await application.bot.send_message(
-            chat_id=user_id,
-            text="ORDER_CREATED_WITHOUT_DATA",
-            parse_mode=ParseMode.HTML,
-        )
 
 
 async def send_vpn_config_deprecated_notification_to_user(
@@ -70,14 +78,14 @@ async def send_vpn_config_deprecated_notification_to_user(
     try:
 
         await application.bot.send_message(
-            chat_id=user_id, text="test", parse_mode=ParseMode.HTML
+            chat_id=user_id, text="test", parse_mode=ParseMode.MARKDOWN
         )
     except Exception as e:
         logger.error("Failed to send message: %s", e)
         await application.bot.send_message(
             chat_id=user_id,
             text="ORDER_CREATED_WITHOUT_DATA",
-            parse_mode=ParseMode.HTML,
+            parse_mode=ParseMode.MARKDOWN,
         )
 
 
@@ -87,9 +95,9 @@ async def approve_pending_photo(update: Update, context: ContextTypes.DEFAULT_TY
     photo_path = f"tmp/order_approval/{photo_file.file_unique_id}.jpg"
     await photo_file.download_to_drive(photo_path)
 
-    user_token = get_or_create_user_token(update.effective_chat.id)
+    user_id = update.effective_chat.id
     if order_id := context.user_data.get("order_id"):
-        get_order_by_id(order_id, user_token)
-        await create_order_approval(photo_path, order_id, user_token)
+        get_order_by_id(order_id, user_id)
+        await create_order_approval(photo_path, order_id, user_id)
 
     await update.message.reply_text(text=WAIT_FOR_APPROVE)

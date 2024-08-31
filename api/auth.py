@@ -1,3 +1,4 @@
+import requests
 from helpers import request
 
 
@@ -6,9 +7,10 @@ def login(identity: str, password: str):
     res = request(
         "collections/users/auth-with-password", params=auth_data, method="POST"
     )
+
     return res
 
 
-def auth_refresh(token):
-    res = request("collections/users/auth-refresh", method="POST", auth_token=token)
-    return res
+# def auth_refresh(token):
+#     res = request("collections/users/auth-refresh", method="POST", user_id=token)
+#     return res

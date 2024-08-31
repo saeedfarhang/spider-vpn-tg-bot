@@ -1,6 +1,9 @@
 import os
 import requests
 
+from api.webhook import notify_error
+from database.database_helper import get_or_create_user_token
+
 
 def request(
     endpoint: str,
@@ -8,15 +11,22 @@ def request(
     files: dict = None,
     method: str = "GET",
     headers: dict = {"content-type": "application/json"},
-    auth_token: str = None,
+    user_id: str = None,
+    call_webhook: bool = False,
 ):
     """Call the backend API and return the response."""
-    base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
+    if call_webhook:
+        host = os.environ.get("WEBHOOK_HOST", "localhost")
+        port = str(os.environ.get("WEBHOOK_PORT", 5000))
+        base_url = "http://" + host + ":" + port
+    else:
+        base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
     url = f"{base_url}/{endpoint}"
-    if auth_token:
+    if user_id:
+        user_token = get_or_create_user_token(user_id)
         headers_with_auth = {
             **headers,
-            "Authorization": f"Bearer {auth_token}",
+            "Authorization": f"Bearer {user_token}",
         }
     else:
         headers_with_auth = {
@@ -46,5 +56,7 @@ def request(
         response.raise_for_status()  # Raise an exception for HTTP errors
         return response.json()  # Assuming the API returns JSON
     except requests.exceptions.RequestException as e:
+        print(e.response)
+        notify_error(user_id, e.response.status_code)
         print(f"API request failed: {e}")
         return None
