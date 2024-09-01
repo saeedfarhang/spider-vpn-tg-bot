@@ -1,5 +1,6 @@
 from flask import json
 
+from bot.messages import CONFIG_DETAIL_FOR_CLIENT
 from helpers.parse_date_string import parse_date_string
 
 
@@ -16,5 +17,7 @@ def outline_config_json_to_str(text: str, order_data: dict):
     except Exception as e:
         print(f"Error retrieving  {e}")
 
-    persian_text = f"{text}\n🔗 لینک اتصال:\n\n\t\t\t\t\t[{access_url}]({access_url})\n\n🎫 اشتراک: {name}\n📅 تاریخ شروع:\n{start_date}\n⏳ تاریخ پایان:\n{end_date}\n📊 حجم اشتراک: {usage_in_gb} گیگابایت"
+    persian_text = CONFIG_DETAIL_FOR_CLIENT.format(
+        text, access_url, name, start_date, end_date, usage_in_gb
+    )
     return persian_text

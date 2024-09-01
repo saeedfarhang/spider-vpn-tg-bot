@@ -51,6 +51,18 @@ def request(
             response = requests.post(
                 url, json=params, timeout=20, headers=headers_with_auth
             )
+        elif method == "DELETE":
+            response = requests.delete(
+                url, json=params, timeout=20, headers=headers_with_auth
+            )
+        elif method == "PUT":
+            response = requests.put(
+                url, json=params, timeout=20, headers=headers_with_auth
+            )
+        elif method == "PATCH":
+            response = requests.patch(
+                url, json=params, timeout=20, headers=headers_with_auth
+            )
         else:
             raise ValueError("Unsupported HTTP method")
         response.raise_for_status()  # Raise an exception for HTTP errors
