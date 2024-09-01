@@ -15,8 +15,11 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 from api.orders import get_order_by_id
-from bot import start
+from bot.handlers.my_account_orders import my_account_orders
+from bot.handlers.select_plans import select_plans
+from bot.handlers.start import start
 from bot.buttons import (
+    admin_details_button,
     home_button,
     my_account_button,
     plan_button,
@@ -24,7 +27,8 @@ from bot.buttons import (
     support_button,
     test_account_button,
 )
-from bot.handlers import my_account_orders, select_plans, test_account
+from bot.handlers.admin import admin_overall_detail
+from bot.handlers.test_account import test_account
 from bot.state import HOME, SELECT_MAIN_ITEM
 from bot.utils import (
     approve_pending_photo,
@@ -180,6 +184,10 @@ def main() -> None:
                     filters.Regex(f"^({test_account_button()[1]})$"), test_account
                 ),
                 MessageHandler(filters.Regex(f"^({home_button()[1]})$"), start),
+                MessageHandler(
+                    filters.Regex(f"^({admin_details_button()[1]})$"),
+                    admin_overall_detail,
+                ),
             ],
         },
         fallbacks=[CommandHandler("start", start)],

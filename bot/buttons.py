@@ -41,3 +41,9 @@ def home_button():
     text = "بازگشت به خانه 🏠"
     button = KeyboardButton(text)
     return [button, text]
+
+
+def admin_details_button():
+    text = "جزئیات بخش ادمین"
+    button = KeyboardButton(text)
+    return [button, text]

@@ -1,6 +1,5 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update
 from api.users import get_user
-from database.database_helper import get_or_create_user_token
 from helpers import request
 
 

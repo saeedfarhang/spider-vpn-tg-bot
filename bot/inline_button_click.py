@@ -1,5 +1,10 @@
 import logging
-from bot.handlers import test_account
+from api.order_approval import approve_order_approval
+from bot.handlers.test_account import test_account
+from bot.handlers.admin.get_pending_approve_orders import (
+    get_pending_approve_orders,
+    get_pending_approve_order_by_data,
+)
 from helpers.json_to_str import outline_config_json_to_str
 
 from telegram import (
@@ -13,12 +18,13 @@ from telegram.ext import (
 from telegram.constants import ParseMode
 from api.orders import create_order
 from bot.messages import (
+    CONNECTION_TUTORIAL_LINKS,
     CREATE_ORDER_FACTOR,
     EDIT_SELECT_PLAN_MESSAGE,
     GET_ORDER_HEAD_TEXT,
     NO_VALID_PAYMENT_GATEWAY,
+    ORDER_APPROVAL_APPROVED_SUCCESSFUL,
 )
-from helpers.json_to_str import outline_config_json_to_str
 from helpers.keyboards import select_plan
 
 # Enable logging
@@ -65,6 +71,8 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
         elif query.data.get("show_keyboard", False) is False:
             await query.edit_message_reply_markup(None)
+        elif query.data.get("delete_message", False):
+            await query.delete_message()
 
         selected_payment_gateway = None
     if callback_type == "plan":
@@ -152,11 +160,28 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
             text=outline_config_json_to_str(
                 GET_ORDER_HEAD_TEXT.format(callback_data.get("id", "N/A")),
                 callback_data,
-            ),
+            )
+            + f"\n\n{CONNECTION_TUTORIAL_LINKS}",
             parse_mode=ParseMode.MARKDOWN,
         )
-
     elif callback_type == "test_account":
         await test_account(update, context)
     elif callback_type == "blank":
         pass
+    elif callback_type == "admin":
+        callback_action = callback_data.get("action", "blank")
+        if callback_action == "pending_approve_orders":
+            if order_approval_data := callback_data.get("data", None):
+                await get_pending_approve_order_by_data(update, order_approval_data)
+            else:
+                await get_pending_approve_orders(update)
+        if callback_action == "approve_order_approval":
+            if order_approval_data := callback_data.get("data", None):
+                print(update.effective_chat.id, order_approval_data["id"])
+                if approve_order_approval(
+                    update.effective_chat.id, order_approval_data["id"]
+                ):
+                    await query.message.reply_text(
+                        text=ORDER_APPROVAL_APPROVED_SUCCESSFUL,
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
