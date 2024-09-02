@@ -1,5 +1,5 @@
 import logging
-from api.order_approval import approve_order_approval
+from api.order_approval import approve_order_approval, detect_fraud_order_approval
 from bot.handlers.test_account import test_account
 from bot.handlers.admin.get_pending_approve_orders import (
     get_pending_approve_orders,
@@ -24,6 +24,7 @@ from bot.messages import (
     GET_ORDER_HEAD_TEXT,
     NO_VALID_PAYMENT_GATEWAY,
     ORDER_APPROVAL_APPROVED_SUCCESSFUL,
+    ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL,
 )
 from helpers.keyboards import select_plan
 
@@ -177,11 +178,19 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
                 await get_pending_approve_orders(update)
         if callback_action == "approve_order_approval":
             if order_approval_data := callback_data.get("data", None):
-                print(update.effective_chat.id, order_approval_data["id"])
                 if approve_order_approval(
                     update.effective_chat.id, order_approval_data["id"]
                 ):
                     await query.message.reply_text(
                         text=ORDER_APPROVAL_APPROVED_SUCCESSFUL,
+                        parse_mode=ParseMode.MARKDOWN,
+                    )
+        elif callback_action == "detect_fraud_order_approval":
+            if order_approval_data := callback_data.get("data", None):
+                if detect_fraud_order_approval(
+                    update.effective_chat.id, order_approval_data["id"]
+                ):
+                    await query.message.reply_text(
+                        text=ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL,
                         parse_mode=ParseMode.MARKDOWN,
                     )

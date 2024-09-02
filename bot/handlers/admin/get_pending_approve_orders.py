@@ -52,11 +52,21 @@ async def get_pending_approve_order_by_data(update: Update, order_approval: dict
     reply_keyboard = [
         [
             InlineKeyboardButton(
-                order_approval["id"],
+                "🟩",
                 callback_data={
                     "type": "admin",
                     "data": {
                         "action": "approve_order_approval",
+                        "data": order_approval,
+                    },
+                },
+            ),
+            InlineKeyboardButton(
+                "🟥",
+                callback_data={
+                    "type": "admin",
+                    "data": {
+                        "action": "detect_fraud_order_approval",
                         "data": order_approval,
                     },
                 },

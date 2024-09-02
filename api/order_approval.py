@@ -51,3 +51,16 @@ def approve_order_approval(user_id: str, order_approval_id: str):
     if res:
         return True
     return False
+
+
+def detect_fraud_order_approval(user_id: str, order_approval_id: str):
+    data = {"is_fraud": True}
+    res = request(
+        f"collections/order_approval/records/{order_approval_id}",
+        data,
+        method="PATCH",
+        user_id=user_id,
+    )
+    if res:
+        return True
+    return False
