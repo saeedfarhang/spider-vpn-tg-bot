@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  app:
+  spider-tg-bot:
     build:
       context: .
       dockerfile: Dockerfile
@@ -9,11 +9,17 @@ services:
       - .:/app
     env_file:
       - .env
-    network_mode: host
+    networks:
+      - spider-vpn-network
+    # network_mode: host
     ports:
       - "8009:8009"
     environment:
       PYTHONDONTWRITEBYTECODE: 1
       PYTHONUNBUFFERED: 1
     command: bash -c "pip install watchdog && watchmedo auto-restart --recursive --patterns='*.py' -- python main.py"
+    restart: "always"
 
+networks:
+  spider-vpn-network:
+    external: true
