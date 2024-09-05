@@ -1,0 +1,50 @@
+name: "master"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      PROJECT_NAME: spider-vpn-tg-bot
+      DIR_PATH: /opt/src/spider/spider-vpn-tg-bot
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check env
+        run: echo "address is ${{ vars.REMOTE_SERVER_USERNAME }}@${{ vars.REMOTE_SERVER_ADDRESS }} in ${{env.DIR_PATH}}"
+
+      - name: Build Docker image
+        run: docker build -t ${{ env.PROJECT_NAME }}:latest .
+
+      - name: Save Docker image as tar file
+        run: docker save -o ${{ env.PROJECT_NAME }}.tar ${{ env.PROJECT_NAME }}:latest
+
+      - name: Transfer Docker image to server
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          scp -o StrictHostKeyChecking=no ${{ env.PROJECT_NAME }}.tar ${{vars.REMOTE_SERVER_USERNAME}}@${{vars.REMOTE_SERVER_ADDRESS}}:${{env.DIR_PATH}}
+
+      - name: Load Docker image on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ vars.REMOTE_SERVER_USERNAME }}@${{ vars.REMOTE_SERVER_ADDRESS }} << 'ENDSSH'
+          docker load -i ${{env.DIR_PATH}}/${{ env.PROJECT_NAME }}.tar
+          ENDSSH
+
+      - name: Transfer Docker Compose file to remote server
+        run: |
+          scp -o StrictHostKeyChecking=no .github/docker-compose.yml ${{ vars.REMOTE_SERVER_USERNAME }}@${{ vars.REMOTE_SERVER_ADDRESS }}:${{env.DIR_PATH}}
+
+      - name: Deploy Docker containers using Docker Compose on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ vars.REMOTE_SERVER_USERNAME }}@${{ vars.REMOTE_SERVER_ADDRESS }} << 'ENDSSH'
+          docker compose -f ${{env.DIR_PATH}}/docker-compose.yml up -d
+          ENDSSH

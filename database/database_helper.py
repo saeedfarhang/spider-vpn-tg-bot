@@ -3,12 +3,14 @@ import sqlite3
 
 from telegram import User
 
-from api.auth import auth_refresh
-from api.users import get_create_user_token
+from helpers.logger import logger
+from api.get_create_user import get_create_user_token
+
+logger = logger(__name__)
 
 
-def create_table():
-    conn = sqlite3.connect("user_tokens.db")
+def create_table() -> None:
+    conn = sqlite3.connect("user_tokens.db", 10)
     c = conn.cursor()
     c.execute(
         """
@@ -29,7 +31,7 @@ def set_user_token(tg_user: User, token: str):
     Updates or inserts a user token in a SQLite database based on the Telegram user ID,
     and updates the `updated_at` timestamp.
     """
-    conn = sqlite3.connect("user_tokens.db")
+    conn = sqlite3.connect("user_tokens.db", 10)
     c = conn.cursor()
     current_time = datetime.now().isoformat()  # Use isoformat without extra formatting
 
@@ -61,13 +63,25 @@ def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
     or creates a new token if it does not exist, handling token replacement if `updated_at`
     is older than 2 hours.
     """
-    conn = sqlite3.connect("user_tokens.db")
+    create_table()
+
+    conn = sqlite3.connect("user_tokens.db", 10)
     c = conn.cursor()
     current_time = datetime.now()  # Use datetime object directly for time comparisons
-
-    c.execute(
-        "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,)
-    )
+    try:
+        c.execute(
+            "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?",
+            (tg_user_id,),
+        )
+    except Exception as e:
+        logger.error("Error: %s", e)
+        conn.close()
+        conn = sqlite3.connect("user_tokens.db", 10)
+        c = conn.cursor()
+        c.execute(
+            "SELECT token, updated_at FROM user_tokens WHERE tg_user_id = ?",
+            (tg_user_id,),
+        )
     result = c.fetchone()
     if result:
         last_updated = datetime.fromisoformat(result[1])  # Parse using fromisoformat
@@ -75,20 +89,44 @@ def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
         if time_diff.total_seconds() <= 7200:
             return result[0]
         else:
-            c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,))
+            try:
+                c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,))
+            except Exception:
+                conn.close()
+                conn = sqlite3.connect("user_tokens.db", 10)
+                c = conn.cursor()
+                c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,))
 
     is_admin = tg_user_id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
     token = get_create_user_token(tg_user_id)
-    c.execute(
-        "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
-        (
-            tg_user_id,
-            token,
-            current_time.isoformat(),
-            is_admin,
-        ),  # Store as ISO format string
-    )
-    conn.commit()
+    try:
+        c.execute(
+            "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
+            (
+                tg_user_id,
+                token,
+                current_time.isoformat(),
+                is_admin,
+            ),  # Store as ISO format string
+        )
+        conn.commit()
+    except Exception:
+        try:
+            conn.close()
+            conn = sqlite3.connect("user_tokens.db", 10)
+            c = conn.cursor()
+            c.execute(
+                "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",
+                (
+                    tg_user_id,
+                    token,
+                    current_time.isoformat(),
+                    is_admin,
+                ),  # Store as ISO format string
+            )
+            conn.commit()
+        except Exception:
+            conn.close()
     conn.close()
     return token
 
