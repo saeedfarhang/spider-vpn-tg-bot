@@ -1,5 +1,6 @@
 import logging
 from api.order_approval import approve_order_approval, detect_fraud_order_approval
+from bot.handlers.how_to_connect import how_to_connect
 from bot.handlers.test_account import test_account
 from bot.handlers.admin.get_pending_approve_orders import (
     get_pending_approve_orders,
@@ -26,7 +27,8 @@ from bot.messages import (
     ORDER_APPROVAL_APPROVED_SUCCESSFUL,
     ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL,
 )
-from helpers.keyboards import select_plan
+from helpers.keyboards import connection_detail_keyboard, select_plan
+from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 # Enable logging
 logging.basicConfig(
@@ -61,11 +63,11 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     if callback_data:
         edit_messages = {
-            "plan": EDIT_SELECT_PLAN_MESSAGE.format(
+            InlineButtonClickTypes.PLAN: EDIT_SELECT_PLAN_MESSAGE.format(
                 callback_data.get("common_name", "no name")
             ),
         }
-
+        print(callback_type, callback_data)
         if edit_message := edit_messages.get(callback_type, None):
             await query.edit_message_text(
                 text=edit_message, parse_mode=ParseMode.MARKDOWN
@@ -76,11 +78,11 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
             await query.delete_message()
 
         selected_payment_gateway = None
-    if callback_type == "plan":
+    if callback_type == InlineButtonClickTypes.PLAN:
         selected_payment_gateway = await select_plan(update, callback_data)
         if selected_payment_gateway is not None:
-            callback_type = "gateway"
-    if callback_type == "gateway":
+            callback_type = InlineButtonClickTypes.GATEWAY
+    if callback_type == InlineButtonClickTypes.GATEWAY:
         if selected_payment_gateway is None:
             selected_payment_gateway = query.data["gateway"]
         data = await create_order(update, callback_data, selected_payment_gateway)
@@ -104,7 +106,7 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
                         InlineKeyboardButton(
                             "تایید نهایی",
                             callback_data={
-                                "type": "payment",
+                                "type": InlineButtonClickTypes.PAYMENT,
                                 "data": {
                                     "payment": first_payment,
                                     "gateway": data["gateway"],
@@ -117,7 +119,7 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
                             InlineKeyboardButton(
                                 f'{payment["amount"]} {payment["currency"]}',
                                 callback_data={
-                                    "type": "payment",
+                                    "type": InlineButtonClickTypes.PAYMENT,
                                     "data": {
                                         "payment": payment,
                                         "gateway": data["gateway"],
@@ -136,27 +138,39 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
                         data["gateway"]["name"],
                     ),
                     reply_markup=InlineKeyboardMarkup(keyboard),
+                    parse_mode=ParseMode.MARKDOWN,
                 )
         elif data and data["payments"] == []:
             await query.message.reply_text(
                 text=NO_VALID_PAYMENT_GATEWAY,
             )
-    elif callback_type == "payment":
+    elif callback_type == InlineButtonClickTypes.PAYMENT:
         payment_gateway = callback_data["gateway"]
         if payment_gateway["type"] == "FREE":
             await query.message.reply_text(
                 text=payment_gateway["data"], parse_mode=ParseMode.HTML
             )
         if payment_gateway["type"] == "ADMIN_APPROVE":
+            keyboard = None
+            if payment_gateway.get("link", False):
+                keyboard = [
+                    [
+                        InlineKeyboardButton("پرداخت", url=payment_gateway["link"]),
+                    ],
+                ]
             await query.message.reply_text(
-                text=payment_gateway["data"], parse_mode=ParseMode.HTML
+                text=payment_gateway["data"],
+                parse_mode=ParseMode.HTML,
+                reply_markup=InlineKeyboardMarkup(keyboard) if keyboard else None,
             )
-
             return
         if payment_gateway["type"] == "PAYPING":
             await query.message.reply_text(text=payment_gateway["url"])
-    elif callback_type == "order":
+    elif callback_type == InlineButtonClickTypes.ORDER:
         logger.debug("callback_data: %c", callback_data)
+
+        keyboard = connection_detail_keyboard()
+
         await query.message.reply_text(
             text=outline_config_json_to_str(
                 GET_ORDER_HEAD_TEXT.format(callback_data.get("id", "N/A")),
@@ -164,12 +178,15 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
             + f"\n\n{CONNECTION_TUTORIAL_LINKS}",
             parse_mode=ParseMode.MARKDOWN,
+            reply_markup=keyboard,
         )
-    elif callback_type == "test_account":
+    elif callback_type == InlineButtonClickTypes.TEST_ACCOUNT:
         await test_account(update, context)
-    elif callback_type == "blank":
+    elif callback_type == InlineButtonClickTypes.HOW_TO_CONNECT:
+        await how_to_connect(update, context)
+    elif callback_type == InlineButtonClickTypes.BLANK:
         pass
-    elif callback_type == "admin":
+    elif callback_type == InlineButtonClickTypes.ADMIN:
         callback_action = callback_data.get("action", "blank")
         if callback_action == "pending_approve_orders":
             if order_approval_data := callback_data.get("data", None):

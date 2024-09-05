@@ -5,6 +5,7 @@ from telegram.ext import ContextTypes
 from api.plans import get_plans
 from bot.messages import ADMIN_OVERALL_DETAIL, SELECT_PLAN
 from helpers import build_keyboard
+from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -13,7 +14,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "آخرین سفارش ها",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -21,7 +22,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "سفارش های در انتظار",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": "pending_approve_orders"},
                 },
@@ -29,7 +30,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "ارسال پیام",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -39,7 +40,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "ارسال پیام دسته جمعی",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -47,7 +48,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "تمدید اشتراک",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -57,7 +58,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "لغو اشتراک",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -65,7 +66,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "درآمد",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },
@@ -75,7 +76,7 @@ async def admin_overall_detail(update: Update, context: ContextTypes.DEFAULT_TYP
             InlineKeyboardButton(
                 "وضعیت سرور ها",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "show_keyboard": True,
                     "data": {"action": ""},
                 },

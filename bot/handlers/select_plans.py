@@ -4,6 +4,7 @@ from telegram.ext import ContextTypes
 from api.plans import get_plans
 from bot.messages import SELECT_PLAN
 from helpers import build_keyboard
+from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -12,11 +13,11 @@ async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         [
             InlineKeyboardButton(
                 "دوره / طرفیت",
-                callback_data={"type": "blank"},
+                callback_data={"type": InlineButtonClickTypes.BLANK},
             ),
             InlineKeyboardButton(
                 "نام",
-                callback_data={"type": "blank"},
+                callback_data={"type": InlineButtonClickTypes.BLANK},
             ),
         ],
         *[
@@ -27,7 +28,7 @@ async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                         if int(plan["capacity"]) and int(plan["capacity"]) > 0
                         else "ناموجود" + " 🟥"
                     ),
-                    callback_data={"type": "plan", "data": plan},
+                    callback_data={"type": InlineButtonClickTypes.PLAN, "data": plan},
                 ),
                 InlineKeyboardButton(
                     (
@@ -39,7 +40,7 @@ async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
                         if plan["shown_price"]
                         else plan["common_name"]
                     ),
-                    callback_data={"type": "plan", "data": plan},
+                    callback_data={"type": InlineButtonClickTypes.PLAN, "data": plan},
                 ),
             ]
             for plan in plans

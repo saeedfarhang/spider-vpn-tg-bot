@@ -1,6 +1,7 @@
 import logging
 import os
 from telegram import Update
+from api.users import get_user
 from bot.buttons import (
     admin_details_button,
     home_button,
@@ -23,12 +24,10 @@ logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     sponsored_channels = os.environ.get("SPONSORED_CHANNELS", None).split(",")
-    admin_members_ids = os.environ.get("USER_ADMIN_IDS", None).split(",")
 
     user_id = update.effective_chat.id
-    admin_member = False
-    if str(user_id) in admin_members_ids:
-        admin_member = True
+    user = get_user(user_id, user_id)
+    admin_member = user.get("is_admin", False)
 
     for channel_id in sponsored_channels:
         if channel_id and not await check_membership(update, context, channel_id):

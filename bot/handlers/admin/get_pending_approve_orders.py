@@ -4,6 +4,7 @@ from telegram import InlineKeyboardButton, Update
 from api.order_approval import get_order_approvals
 from bot.messages import GET_PENDING_ORDER_APPROVALS, ORDER_APPROVAL_DETAIL_TEXT
 from helpers import build_keyboard, request
+from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def get_pending_approve_orders(update: Update):
@@ -13,7 +14,7 @@ async def get_pending_approve_orders(update: Update):
             [
                 InlineKeyboardButton(
                     "ID",
-                    callback_data={"type": "blank"},
+                    callback_data={"type": InlineButtonClickTypes.BLANK},
                 ),
             ],
             *[
@@ -21,7 +22,7 @@ async def get_pending_approve_orders(update: Update):
                     InlineKeyboardButton(
                         order_approval["id"],
                         callback_data={
-                            "type": "admin",
+                            "type": InlineButtonClickTypes.ADMIN,
                             "delete_message": True,
                             "data": {
                                 "action": "pending_approve_orders",
@@ -38,7 +39,7 @@ async def get_pending_approve_orders(update: Update):
             [
                 InlineKeyboardButton(
                     "سفارشی ثبت نشده است",
-                    callback_data={"type": "blank"},
+                    callback_data={"type": InlineButtonClickTypes.BLANK},
                 ),
             ]
         ]
@@ -54,7 +55,7 @@ async def get_pending_approve_order_by_data(update: Update, order_approval: dict
             InlineKeyboardButton(
                 "🟩",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "data": {
                         "action": "approve_order_approval",
                         "data": order_approval,
@@ -64,7 +65,7 @@ async def get_pending_approve_order_by_data(update: Update, order_approval: dict
             InlineKeyboardButton(
                 "🟥",
                 callback_data={
-                    "type": "admin",
+                    "type": InlineButtonClickTypes.ADMIN,
                     "data": {
                         "action": "detect_fraud_order_approval",
                         "data": order_approval,

@@ -8,6 +8,7 @@ from api.orders import get_gateway_payments
 from bot.messages import (
     SELECT_GATEWAY,
 )
+from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 # Enable logging
 logging.basicConfig(
@@ -32,7 +33,7 @@ async def select_plan(update: Update, plan):
         [
             InlineKeyboardButton(
                 "درگاه پرداخت",
-                callback_data={"type": "blank"},
+                callback_data={"type": InlineButtonClickTypes.BLANK},
             ),
         ],
         *[
@@ -40,7 +41,7 @@ async def select_plan(update: Update, plan):
                 InlineKeyboardButton(
                     f'{gateway["name"]}',
                     callback_data={
-                        "type": "gateway",
+                        "type": InlineButtonClickTypes.GATEWAY,
                         "data": plan,
                         "gateway": gateway,
                     },
@@ -54,3 +55,15 @@ async def select_plan(update: Update, plan):
         SELECT_GATEWAY,
         reply_markup=InlineKeyboardMarkup(keyboard),
     )
+
+
+def connection_detail_keyboard():
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "راهنمای اتصال",
+                callback_data={"type": InlineButtonClickTypes.HOW_TO_CONNECT},
+            ),
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
