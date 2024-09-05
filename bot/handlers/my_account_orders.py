@@ -9,6 +9,8 @@ from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    print("\n\n\n")
+
     user = update.message.from_user
     orders = get_my_orders_by_status("COMPLETE", user.id)
     reply_keyboard = []

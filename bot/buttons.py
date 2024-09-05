@@ -14,7 +14,7 @@ def pricing_button():
 
 
 def support_button():
-    text = " پشتیبانی 🎧"
+    text = "ارتباط با پشتیبان 🎧"
     button = KeyboardButton(text)
     return [button, text]
 

@@ -1,6 +1,9 @@
 import logging
 from api.order_approval import approve_order_approval, detect_fraud_order_approval
-from bot.handlers.how_to_connect import how_to_connect
+from bot.handlers.how_to_connect import (
+    how_to_connect,
+    how_to_connect_data_callback,
+)
 from bot.handlers.test_account import test_account
 from bot.handlers.admin.get_pending_approve_orders import (
     get_pending_approve_orders,
@@ -183,7 +186,10 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
     elif callback_type == InlineButtonClickTypes.TEST_ACCOUNT:
         await test_account(update, context)
     elif callback_type == InlineButtonClickTypes.HOW_TO_CONNECT:
-        await how_to_connect(update, context)
+        if callback_data and callback_data["platform"]:
+            await how_to_connect_data_callback(query, callback_data["platform"])
+        else:
+            await how_to_connect(update, context)
     elif callback_type == InlineButtonClickTypes.BLANK:
         pass
     elif callback_type == InlineButtonClickTypes.ADMIN:

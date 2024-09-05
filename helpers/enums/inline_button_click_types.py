@@ -10,3 +10,10 @@ class InlineButtonClickTypes(Enum):
     ORDER = "ORDER"
     TEST_ACCOUNT = "TEST_ACCOUNT"
     GATEWAY = "GATEWAY"
+
+
+class Platforms(Enum):
+    WINDOWS = "WINDOWS"
+    IOS = "IOS"
+    ANDROID = "ANDROID"
+    OTHER = "OTHER"
