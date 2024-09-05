@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   spider-tg-bot:
-    image: tg-bot:latest
+    image: spider-vpn-tg-bot:latest
     env_file:
       - .env
     ports:
