@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  spider-tg-bot:
+    image: tg-bot:latest
+    env_file:
+      - .env
+    ports:
+      - "8009:8009" 
+    networks:
+      - spider-vpn-network
+    environment:
+      PYTHONDONTWRITEBYTECODE: 1
+      PYTHONUNBUFFERED: 1
+
+
+networks:
+  spider-vpn-network:
+    external: true
