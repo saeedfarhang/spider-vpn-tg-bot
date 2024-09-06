@@ -10,13 +10,15 @@ from bot.buttons import (
     support_button,
     test_account_button,
 )
-from bot.messages import WELCOME
+from bot.messages import SPONSORED_CHANNELS_FORCE_TEXT, WELCOME
 from bot.state import SELECT_MAIN_ITEM
 from helpers import check_membership, build_keyboard
 from telegram.ext import (
     ContextTypes,
     ConversationHandler,
 )
+
+from helpers.keyboards import sponsor_channels_keyboard
 
 
 logger = logging.getLogger(__name__)
@@ -32,7 +34,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     for channel_id in sponsored_channels:
         if channel_id and not await check_membership(update, context, channel_id):
             await update.message.reply_text(
-                f"You must join our channel to use this bot. Please join {channel_id} and then type /start again."
+                SPONSORED_CHANNELS_FORCE_TEXT.format(channel_id),
+                reply_markup=sponsor_channels_keyboard(sponsored_channels),
             )
             return ConversationHandler.END
 

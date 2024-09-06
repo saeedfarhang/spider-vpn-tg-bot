@@ -67,3 +67,17 @@ def connection_detail_keyboard():
         ]
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def sponsor_channels_keyboard(channel_ids: list[str]):
+    keyboard = [
+        [
+            *[
+                InlineKeyboardButton(
+                    "کانال " + channel_id, url="https://t.me/" + channel_id[1:]
+                )
+                for channel_id in channel_ids
+            ]
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)

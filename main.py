@@ -37,13 +37,13 @@ from threading import Thread
 from bot.webhook.server import run_webserver
 from helpers import logger
 
-# # Proxy settings (if needed)
-# HTTP_PROXY = "http://localhost:20171"
-# os.environ["no_proxy"] = "127.0.0.1,localhost"
-# os.environ["http_proxy"] = HTTP_PROXY
-# os.environ["HTTP_PROXY"] = HTTP_PROXY
-# os.environ["https_proxy"] = HTTP_PROXY
-# os.environ["HTTPS_PROXY"] = HTTP_PROXY
+# Proxy settings (if needed)
+HTTP_PROXY = "http://localhost:20171"
+os.environ["no_proxy"] = "127.0.0.1,localhost"
+os.environ["http_proxy"] = HTTP_PROXY
+os.environ["HTTP_PROXY"] = HTTP_PROXY
+os.environ["https_proxy"] = HTTP_PROXY
+os.environ["HTTPS_PROXY"] = HTTP_PROXY
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
@@ -65,10 +65,7 @@ async def support(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def set_commands(application: Application) -> None:
     """Set up command suggestions for the bot."""
     commands = [
-        ("start", "Start the bot"),
-        ("menu", "Show the main menu"),
-        ("support", "Get support"),
-        ("pricing", "View pricing plans"),
+        ("start", home_button()[1]),
     ]
     await application.bot.set_my_commands(commands)
 
@@ -76,9 +73,6 @@ async def set_commands(application: Application) -> None:
 def main() -> None:
     """Run the bot."""
     my_ip = requests.get("https://icanhazip.com", timeout=10).text
-    print("hello from ", my_ip)
-    # Create the Application and pass it your bot's token.
-    # context_types = ContextTypes(context=CustomContext)
     application = (
         Application.builder()
         .token(TOKEN)
@@ -88,90 +82,9 @@ def main() -> None:
         .get_updates_connect_timeout(40)
         .get_updates_read_timeout(42)
         .post_init(set_commands)
-        # .context_types(context_types)
         .arbitrary_callback_data(True)
         .build()
     )
-
-    # @app.route("/trigger-notification")
-    # async def deprecated_vpn_config():
-    #     user_id = request.args.get("user_id")
-    #     order_id = request.args.get("order_id")
-
-    # @app.route("/deprecated-vpn-config")
-    # async def deprecated_vpn_config():
-    #     user_id = request.args.get("user_id")
-    #     order_id = request.args.get("order_id")
-
-    #     if user_id and order_id:
-    #         logger.info(
-    #             "deprecated order triggered. user_id: %s, order_id: %s",
-    #             user_id,
-    #             order_id,
-    #         )
-    #         await send_vpn_config_deprecated_notification_to_user(
-    #             application, user_id, order_id
-    #         )
-    #         return "Message sent to user", 200
-    #     return "User ID or Config ID not provided", 400
-
-    # @app.route("/expiry-vpn-config")
-    # async def expiry_vpn_config():
-    #     user_id = request.args.get("user_id")
-    #     order_id = request.args.get("order_id")
-    #     hours_to_expire = int(request.args.get("hours_to_expire", "0"))
-    #     remain_in_mb = int(request.args.get("remain_in_mb", "0"))
-
-    #     if user_id and order_id:
-    #         logger.info(
-    #             "expire vpn triggered. user_id: %s, order_id: %s",
-    #             user_id,
-    #             order_id,
-    #         )
-    #         await send_vpn_config_expiry_notification_to_user(
-    #             application, user_id, order_id, hours_to_expire, remain_in_mb
-    #         )
-    #         return "Message sent to user", 200
-    #     return "User ID or Config ID not provided", 400
-
-    # @app.route("/trigger-vpn-config")
-    # async def vpn_config_request():
-    #     user_id = request.args.get("user_id")
-    #     order_id = request.args.get("order_id")
-    #     if user_id and order_id:
-    #         if order_id == "Nil":
-    #             logger.info(
-    #                 "duplicate test account webhook triggered. user_id: %s, order_id: %s",
-    #                 user_id,
-    #                 order_id,
-    #             )
-    #             await send_duplicate_test_account_message_to_user(application, user_id)
-    #             return "Message sent to user", 200
-    #         logger.info(
-    #             "new order triggered. user_id: %s, order_id: %s",
-    #             user_id,
-    #             order_id,
-    #         )
-    #         order = get_order_by_id(order_id, user_id)
-    #         await send_vpn_config_to_user(application, user_id, order)
-    #         return "Message sent to user", 200
-    #     return "User ID or Config ID not provided", 400
-
-    # @app.route("/trigger/request-error-notification")
-    # async def trigger_request_error_notification():
-    #     status = request.args.get("status", 500)
-    #     user_id = request.args.get("user_id")
-
-    #     await send_request_error_notification_to_user(application, user_id, status)
-
-    # @app.route("/trigger/send-new-order-approval-admin")
-    # async def trigger_send_new_order_approval_notification_to_admins():
-    #     order_approval_id = request.args.get("order_approval_id", None)
-    #     user_id = request.args.get("user_id", None)
-
-    #     await send_new_order_approval_notification_to_admin(
-    #         application, user_id, order_approval_id
-    #     )
 
     # # Start the web server in a separate thread
     web_server_thread = Thread(target=run_webserver, args=(application,))
