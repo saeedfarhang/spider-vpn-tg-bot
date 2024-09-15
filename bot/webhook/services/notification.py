@@ -14,6 +14,7 @@ from telegram.constants import ParseMode
 
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 from helpers.json_to_str import outline_config_json_to_str
+from helpers.keyboards import connection_detail_keyboard
 
 logger = logger(__name__)
 
@@ -48,9 +49,11 @@ async def send_vpn_config_to_user(application: Application, user_id, order):
         connection_data_str = outline_config_json_to_str(
             COMPLETE_ORDER_HEAD_TEXT, order
         )
+        keyboard = connection_detail_keyboard()
         await application.bot.send_message(
             chat_id=user_id,
             text=connection_data_str + f"\n\n{CONNECTION_TUTORIAL_LINKS}",
+            reply_markup=keyboard,
             parse_mode=ParseMode.MARKDOWN,
         )
     except Exception as e:

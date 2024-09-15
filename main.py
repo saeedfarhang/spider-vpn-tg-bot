@@ -1,49 +1,34 @@
 import logging
 import os
-import requests
-from telegram import (
-    Update,
-)
+from threading import Thread
 
-from telegram.ext import (
-    Application,
-    CommandHandler,
-    ContextTypes,
-    ConversationHandler,
-    MessageHandler,
-    filters,
-    CallbackQueryHandler,
-)
+import requests
+from telegram import Update
+from telegram.ext import (Application, CallbackQueryHandler, CommandHandler,
+                          ContextTypes, ConversationHandler, MessageHandler,
+                          filters)
+
+from bot import inline_button_click
+from bot.buttons import (admin_details_button, home_button, my_account_button,
+                         plan_button, pricing_button, support_button,
+                         test_account_button)
+from bot.handlers.admin import admin_overall_detail
 from bot.handlers.my_account_orders import my_account_orders
 from bot.handlers.select_plans import select_plans
 from bot.handlers.start import start
-from bot.buttons import (
-    admin_details_button,
-    home_button,
-    my_account_button,
-    plan_button,
-    pricing_button,
-    support_button,
-    test_account_button,
-)
-from bot.handlers.admin import admin_overall_detail
 from bot.handlers.test_account import test_account
 from bot.state import HOME, SELECT_MAIN_ITEM
-from bot.utils import (
-    approve_pending_photo,
-)
-from bot import inline_button_click
-from threading import Thread
+from bot.utils import approve_pending_photo
 from bot.webhook.server import run_webserver
 from helpers import logger
 
-# Proxy settings (if needed)
-# HTTP_PROXY = "http://localhost:20171"
-# os.environ["no_proxy"] = "127.0.0.1,localhost"
-# os.environ["http_proxy"] = HTTP_PROXY
-# os.environ["HTTP_PROXY"] = HTTP_PROXY
-# os.environ["https_proxy"] = HTTP_PROXY
-# os.environ["HTTPS_PROXY"] = HTTP_PROXY
+# Proxy settings
+HTTP_PROXY = os.environ.get('HTTP_PROXY')
+if HTTP_PROXY:
+    os.environ["http_proxy"] = HTTP_PROXY
+    os.environ["HTTP_PROXY"] = HTTP_PROXY
+    os.environ["https_proxy"] = HTTP_PROXY
+    os.environ["HTTPS_PROXY"] = HTTP_PROXY
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
