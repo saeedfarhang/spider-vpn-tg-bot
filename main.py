@@ -23,12 +23,12 @@ from bot.webhook.server import run_webserver
 from helpers import logger
 
 # Proxy settings
-HTTP_PROXY = os.environ.get('HTTP_PROXY')
-if HTTP_PROXY:
-    os.environ["http_proxy"] = HTTP_PROXY
-    os.environ["HTTP_PROXY"] = HTTP_PROXY
-    os.environ["https_proxy"] = HTTP_PROXY
-    os.environ["HTTPS_PROXY"] = HTTP_PROXY
+HTTP_PROXY_URL = os.environ.get('HTTP_PROXY_URL')
+if HTTP_PROXY_URL and HTTP_PROXY_URL != "False" and HTTP_PROXY_URL != "":
+    os.environ["http_proxy"] = HTTP_PROXY_URL
+    os.environ["HTTP_PROXY"] = HTTP_PROXY_URL
+    os.environ["https_proxy"] = HTTP_PROXY_URL
+    os.environ["HTTPS_PROXY"] = HTTP_PROXY_URL
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 
