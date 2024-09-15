@@ -24,7 +24,6 @@ from helpers import logger
 
 # Proxy settings
 HTTP_PROXY_URL = os.environ.get('HTTP_PROXY_URL')
-print(HTTP_PROXY_URL)
 if HTTP_PROXY_URL and HTTP_PROXY_URL != "False" and HTTP_PROXY_URL != "":
     os.environ["http_proxy"] = HTTP_PROXY_URL
     os.environ["HTTP_PROXY"] = HTTP_PROXY_URL
