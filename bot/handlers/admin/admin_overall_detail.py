@@ -1,9 +1,7 @@
 from telegram import InlineKeyboardButton, Update
-from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
-from api.plans import get_plans
-from bot.messages import ADMIN_OVERALL_DETAIL, SELECT_PLAN
+from bot.messages import ADMIN_OVERALL_DETAIL
 from helpers import build_keyboard
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 

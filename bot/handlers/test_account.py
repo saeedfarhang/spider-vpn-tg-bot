@@ -9,7 +9,8 @@ from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def test_account(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    plans = get_plans("FREE")
+    user_id = update.effective_chat.id
+    plans = get_plans(user_id,"FREE")
     query = update.callback_query
     reply_keyboard = [
         [

@@ -1,17 +1,12 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from api.order_approval import get_order_approvals
-from bot.messages import (
-    COMPLETE_ORDER_HEAD_TEXT,
-    CONNECTION_TUTORIAL_LINKS,
-    DUPLICATE_TEST_ACCOUNT,
-    EXPIRY_NOTIFICATION,
-    NEW_ORDER_APPROVAL,
-    ORDER_CREATED_WITHOUT_DATA,
-)
-from helpers import logger
-from telegram.ext import Application
 from telegram.constants import ParseMode
+from telegram.ext import Application
 
+from api.order_approval import get_order_approvals
+from bot.messages import (COMPLETE_ORDER_HEAD_TEXT, CONNECTION_TUTORIAL_LINKS,
+                          DUPLICATE_TEST_ACCOUNT, EXPIRY_NOTIFICATION,
+                          NEW_ORDER_APPROVAL, ORDER_CREATED_WITHOUT_DATA)
+from helpers import logger
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 from helpers.json_to_str import outline_config_json_to_str
 from helpers.keyboards import connection_detail_keyboard
