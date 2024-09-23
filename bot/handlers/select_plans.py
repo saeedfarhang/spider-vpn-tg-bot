@@ -8,7 +8,9 @@ from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 
 
 async def select_plans(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    plans = get_plans()
+    user_id = update.effective_chat.id
+
+    plans = get_plans(user_id)
     reply_keyboard = [
         [
             InlineKeyboardButton(
