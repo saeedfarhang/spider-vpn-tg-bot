@@ -1,17 +1,19 @@
 import logging
-from flask import Blueprint
-from flask import request
+
+from flask import Blueprint, request
+from telegram.ext import Application
+
 from api.orders import get_order_by_id
 from bot.webhook.services.notification import (
     send_duplicate_test_account_message_to_user,
     send_new_order_approval_notification_to_admin,
     send_request_error_notification_to_user,
+    send_server_health_to_admin,
     send_vpn_config_deprecated_notification_to_user,
     send_vpn_config_expiry_notification_to_user,
     send_vpn_config_to_user,
 )
 from helpers.logger import logger
-from telegram.ext import Application
 
 # Enable logging
 logging.basicConfig(
@@ -105,5 +107,12 @@ def construct_blueprint(application: Application):
         await send_new_order_approval_notification_to_admin(
             application, user_id, order_approval_id
         )
+
+    @bp.route("/trigger/send-server-health-admin/", methods=["POST"])
+    async def trigger_send_server_health_admins():
+        user_id = request.args.get("user_id", None)
+        servers_health_status = request.get_json()
+
+        await send_server_health_to_admin(application, user_id, servers_health_status)
 
     return bp

@@ -22,5 +22,4 @@ async def build_keyboard(
         )
     else:
         await update.message.reply_text(message, reply_markup=reply_markup)
-
     return
