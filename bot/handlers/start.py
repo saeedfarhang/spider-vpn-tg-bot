@@ -23,10 +23,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     admin_member = user.get("is_admin", False)
 
     for channel_id in sponsored_channels:
-        if channel_id and channel_id != "" and not await check_membership(update, context, channel_id):
+        if (
+            channel_id
+            and channel_id != ""
+            and not await check_membership(update, context, channel_id)
+        ):
             await update.message.reply_text(
                 SPONSORED_CHANNELS_FORCE_TEXT.format(channel_id),
-                reply_markup=sponsor_channels_keyboard(sponsored_channels),
+                reply_markup=sponsor_channels_keyboard(sponsored_channels)
             )
             return ConversationHandler.END
 

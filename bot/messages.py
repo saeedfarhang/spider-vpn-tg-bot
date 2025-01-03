@@ -33,3 +33,6 @@ ORDER_APPROVAL_DETAIL_TEXT = "سفارش {} منتظر تایید میباشد.\
 ORDER_APPROVAL_APPROVED_SUCCESSFUL = "سفارش با موفقیت ایجاد و تنظیم شد."
 ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL = "سفارش با موفقیت لغو شد."
 NEW_ORDER_APPROVAL = "یک سفارش جدید، منتظر دریافت تایید است.\nاapproval id: *{}*"
+SERVERS_HEALTH_TITLE = "وضعیت سرورها:"
+SERVERS_HEALTH_DETAIL = "سرور {} در وضعیت {} است."
+SERVERS_HEALTH_ERROR = "متن خطا:\n{}"

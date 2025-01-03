@@ -17,6 +17,11 @@ async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = MY_ACCOUNT_ORDERS_NOT_FOUND
     if len(orders):
         text = MY_ACCOUNT_ORDERS
+        orders_reply_keyboard = []
+        for order in orders:
+            order_expand = order.get("expand", None)
+            if order_expand:
+                orders_reply_keyboard.append(order)
         reply_keyboard = [
             [
                 InlineKeyboardButton(
@@ -46,7 +51,7 @@ async def my_account_orders(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         },
                     ),
                 ]
-                for order in orders
+                for order in orders_reply_keyboard
             ],
         ]
     else:
