@@ -1,4 +1,5 @@
 import os
+
 import requests
 
 from api.webhook import notify_error
@@ -68,7 +69,7 @@ def request(
         response.raise_for_status()  # Raise an exception for HTTP errors
         return response.json()  # Assuming the API returns JSON
     except requests.exceptions.RequestException as e:
-        print(e.response)
+        print(user_id, e.response)
         notify_error(user_id, e.response.status_code)
         print(f"API request failed: {e}")
         return None

@@ -66,10 +66,8 @@ def connection_detail_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 
-def open_dashboard_keyboard():   
-    dashboard_url = os.environ.get(
-                "DASHBOARD_URL", "http://localhost:8090/_"
-            )
+def open_dashboard_keyboard():
+    dashboard_url = os.environ.get("DASHBOARD_URL", "http://localhost:8090/_")
     keyboard = [
         [
             InlineKeyboardButton(

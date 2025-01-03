@@ -4,10 +4,10 @@ from telegram.ext import Application
 
 from api.order_approval import get_order_approvals
 from bot.messages import (COMPLETE_ORDER_HEAD_TEXT, CONNECTION_TUTORIAL_LINKS,
-                          DUPLICATE_TEST_ACCOUNT, EXPIRY_NOTIFICATION,
-                          NEW_ORDER_APPROVAL, ORDER_CREATED_WITHOUT_DATA,
-                          SERVERS_HEALTH_DETAIL, SERVERS_HEALTH_ERROR,
-                          SERVERS_HEALTH_TITLE)
+                          DUPLICATE_TEST_ACCOUNT, ERROR_NOTIFICATIONS,
+                          EXPIRY_NOTIFICATION, NEW_ORDER_APPROVAL,
+                          ORDER_CREATED_WITHOUT_DATA, SERVERS_HEALTH_DETAIL,
+                          SERVERS_HEALTH_ERROR, SERVERS_HEALTH_TITLE)
 from helpers import logger
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 from helpers.json_to_str import outline_config_json_to_str
@@ -67,7 +67,7 @@ async def send_request_error_notification_to_user(
     application: Application, user_id: int, status: int
 ):
     await application.bot.send_message(
-        chat_id=user_id, text="connection_data_str", parse_mode=ParseMode.MARKDOWN
+        chat_id=user_id, text=ERROR_NOTIFICATIONS.get(str(status)), parse_mode=ParseMode.MARKDOWN
     )
 
 
@@ -126,17 +126,18 @@ async def send_server_health_to_admin(
                     error_message += SERVERS_HEALTH_ERROR.format(status["errorMessage"])
                 error_message += "\n\n"
                 reply_markup = open_dashboard_keyboard()
-            
+
             await application.bot.send_message(
                 chat_id=user_id,
                 text=error_message,
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
             )
         return
     except Exception as e:
         logger.error("Failed to send message: %s", e)
         return
+
 
 async def send_vpn_config_expiry_notification_to_user(
     application: Application,
@@ -154,5 +155,3 @@ async def send_vpn_config_expiry_notification_to_user(
         )
     except Exception as e:
         logger.error("Failed to send message: %s", e)
-
-
