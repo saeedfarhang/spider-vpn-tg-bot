@@ -1,4 +1,5 @@
 import os
+
 import requests
 
 from api.webhook import notify_error
@@ -22,7 +23,7 @@ def bare_login(
             timeout=20,
         )
     except requests.exceptions.RequestException as e:
-        print(e.response)
+        print(identity, e.response)
         notify_error(identity, 500)
         print(f"API request failed: {e}")
         return None

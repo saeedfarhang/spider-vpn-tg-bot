@@ -11,7 +11,7 @@ def notify_error(user_id: str, status_code: int):
         requests.request(
             "GET",
             base_url
-            + "/trigger/request-error-notification"
+            + "/api/v1/trigger/request-error-notification"
             + f"?user_id={user_id}&status={status_code}",
             headers={"content-type": "application/json"},
             json={},

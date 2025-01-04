@@ -28,11 +28,6 @@ def construct_blueprint(application: Application):
         __name__,
     )
 
-    @bp.route("/trigger-notification")
-    async def trigger_notification_controller():
-        user_id = request.args.get("user_id")
-        order_id = request.args.get("order_id")
-
     @bp.route("/deprecated-vpn-config")
     async def deprecated_vpn_config():
         user_id = request.args.get("user_id")
@@ -96,7 +91,7 @@ def construct_blueprint(application: Application):
     async def trigger_request_error_notification():
         status = request.args.get("status", 500)
         user_id = request.args.get("user_id")
-
+        
         await send_request_error_notification_to_user(application, user_id, status)
 
     @bp.route("/trigger/send-new-order-approval-admin")
