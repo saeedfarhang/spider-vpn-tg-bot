@@ -22,7 +22,7 @@ async def send_vpn_config_deprecated_notification_to_user(
 ):
     try:
         await application.bot.send_message(
-            chat_id=user_id, text="test", parse_mode=ParseMode.MARKDOWN
+            chat_id=user_id, text=EXPIRY_NOTIFICATION.format(order_id, 0, 0), parse_mode=ParseMode.MARKDOWN
         )
     except Exception as e:
         logger.error("Failed to send message: %s", e)
