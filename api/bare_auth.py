@@ -3,6 +3,7 @@ import os
 import requests
 
 from api.webhook import notify_error
+from helpers.get_user_email import get_user_identity
 
 
 def bare_login(
@@ -13,7 +14,8 @@ def bare_login(
         os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
         + "/collections/users/auth-with-password"
     )
-    auth_data = {"identity": identity, "password": password}
+    auth_data = {"identity": get_user_identity(identity), "password": password}
+    print("auth_data", auth_data)
     try:
         response = requests.request(
             "POST",
@@ -23,23 +25,24 @@ def bare_login(
             timeout=20,
         )
     except requests.exceptions.RequestException as e:
-        print(identity, e.response)
         notify_error(identity, 500)
         print(f"API request failed: {e}")
         return None
     res = response.json()
-    status = res.get("code", 0)
-    if status:
+    if res.get("token", None) is not None:
+        return res
+    status = res.get("status", 0)
+    if status != 200:
         print(f"API request contain error: {res}")
         return None
-    return res
 
 
 def bare_signup(user_data: dict):
     url = (
         os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
-        + "/collections/users/records/"
+        + "/collections/users/records"
     )
+    print("user_data",user_data)
     try:
         response = requests.request(
             "POST",
@@ -51,5 +54,9 @@ def bare_signup(user_data: dict):
     except requests.exceptions.RequestException as e:
         print(f"API request failed: {e}")
         return None
-    print(user_data, response.json())
-    return response.json()
+    res = response.json()
+    status = res.get("status", 0)
+    if status != 200:
+        print(f"API request failed: {res}")
+        return None
+    return res

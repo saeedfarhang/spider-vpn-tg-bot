@@ -1,5 +1,7 @@
 import logging
+
 from api.bare_auth import bare_login, bare_signup
+from helpers.get_user_email import get_user_identity
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -17,12 +19,11 @@ def get_create_user_token(tg_user_id: str) -> str:
     login process for the given Telegram user (`tg_user`).
     """
     token = bare_login(str(tg_user_id), "test12332232test")
-    print(token)
+    print("\ntoken", token)
     if token:
         logger.info("token retrieves by login %s", token)
     else:
         user_data = {
-            "username": str(tg_user_id),
             "tg_id": str(tg_user_id),
             "tg_username": str(tg_user_id),
             "password": "test12332232test",

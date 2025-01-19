@@ -1,37 +1,25 @@
 import logging
-from api.order_approval import approve_order_approval, detect_fraud_order_approval
-from bot.handlers.how_to_connect import (
-    how_to_connect,
-    how_to_connect_data_callback,
-)
-from bot.handlers.test_account import test_account
-from bot.handlers.admin.get_pending_approve_orders import (
-    get_pending_approve_orders,
-    get_pending_approve_order_by_data,
-)
-from helpers.json_to_str import outline_config_json_to_str
 
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    Update,
-)
-from telegram.ext import (
-    ContextTypes,
-)
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.constants import ParseMode
+from telegram.ext import ContextTypes
+
+from api.order_approval import (approve_order_approval,
+                                detect_fraud_order_approval)
 from api.orders import create_order
-from bot.messages import (
-    CONNECTION_TUTORIAL_LINKS,
-    CREATE_ORDER_FACTOR,
-    EDIT_SELECT_PLAN_MESSAGE,
-    GET_ORDER_HEAD_TEXT,
-    NO_VALID_PAYMENT_GATEWAY,
-    ORDER_APPROVAL_APPROVED_SUCCESSFUL,
-    ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL,
-)
-from helpers.keyboards import connection_detail_keyboard, select_plan
+from bot.handlers.admin.get_pending_approve_orders import (
+    get_pending_approve_order_by_data, get_pending_approve_orders)
+from bot.handlers.how_to_connect import (how_to_connect,
+                                         how_to_connect_data_callback)
+from bot.handlers.test_account import test_account
+from bot.messages import (CONNECTION_TUTORIAL_LINKS, CREATE_ORDER_FACTOR,
+                          EDIT_SELECT_PLAN_MESSAGE, GET_ORDER_HEAD_TEXT,
+                          NO_VALID_PAYMENT_GATEWAY,
+                          ORDER_APPROVAL_APPROVED_SUCCESSFUL,
+                          ORDER_APPROVAL_DETECT_FRAUD_SUCCESSFUL)
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
+from helpers.json_to_str import outline_config_json_to_str
+from helpers.keyboards import connection_detail_keyboard, select_plan
 
 # Enable logging
 logging.basicConfig(
@@ -70,7 +58,6 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
                 callback_data.get("common_name", "no name")
             ),
         }
-        print(callback_type, callback_data)
         if edit_message := edit_messages.get(callback_type, None):
             await query.edit_message_text(
                 text=edit_message, parse_mode=ParseMode.MARKDOWN
@@ -82,8 +69,10 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         selected_payment_gateway = None
     if callback_type == InlineButtonClickTypes.PLAN:
-        selected_payment_gateway = await select_plan(update, callback_data)
-        if selected_payment_gateway is not None:
+        selected_payment_gateway = None
+        if (int(callback_data.get("capacity", "0"))):
+            selected_payment_gateway = await select_plan(update, callback_data)
+        elif selected_payment_gateway is not None:
             callback_type = InlineButtonClickTypes.GATEWAY
     if callback_type == InlineButtonClickTypes.GATEWAY:
         if selected_payment_gateway is None:
