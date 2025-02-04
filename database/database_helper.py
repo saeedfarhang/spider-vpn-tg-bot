@@ -1,10 +1,10 @@
-from datetime import datetime
 import sqlite3
+from datetime import datetime
 
 from telegram import User
 
-from helpers.logger import logger
 from api.get_create_user import get_create_user_token
+from helpers.logger import logger
 
 logger = logger(__name__)
 
@@ -57,7 +57,12 @@ def set_user_token(tg_user: User, token: str):
     return token
 
 
-def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
+def get_or_create_user_token(
+    tg_user_id: str,
+    USER_ADMIN_IDS: list = None,
+    tg_username: str = None,
+    full_name: str = None,
+):
     """
     Retrieves an existing user token from the database based on the Telegram user ID
     or creates a new token if it does not exist, handling token replacement if `updated_at`
@@ -98,7 +103,12 @@ def get_or_create_user_token(tg_user_id: str, USER_ADMIN_IDS: list = None):
                 c.execute("DELETE FROM user_tokens WHERE tg_user_id = ?", (tg_user_id,))
 
     is_admin = tg_user_id in USER_ADMIN_IDS if USER_ADMIN_IDS else []
-    token = get_create_user_token(tg_user_id)
+    token = get_create_user_token(
+        tg_user_id,
+        tg_username,
+        full_name,
+    )
+
     try:
         c.execute(
             "INSERT INTO user_tokens (tg_user_id, token, updated_at, is_admin) VALUES (?, ?, ?, ?)",

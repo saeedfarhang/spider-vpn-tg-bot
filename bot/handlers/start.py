@@ -5,8 +5,14 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from api.users import get_user
-from bot.buttons import (admin_details_button, home_button, my_account_button,
-                         plan_button, support_button, test_account_button)
+from bot.buttons import (
+    admin_details_button,
+    home_button,
+    my_account_button,
+    plan_button,
+    support_button,
+    test_account_button,
+)
 from bot.messages import SPONSORED_CHANNELS_FORCE_TEXT, WELCOME
 from bot.state import SELECT_MAIN_ITEM
 from helpers import build_keyboard, check_membership
@@ -17,10 +23,10 @@ logger = logging.getLogger(__name__)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     sponsored_channels = os.environ.get("SPONSORED_CHANNELS", "").split(",")
-    # here we get referral code if any exists and create 
+    # here we get referral code if any exists and create
     print(context.args)
     user_id = update.effective_chat.id
-    user = get_user(user_id, user_id)
+    user = get_user(user_id, user_id, update.effective_chat)
     admin_member = user.get("is_admin", False)
 
     for channel_id in sponsored_channels:

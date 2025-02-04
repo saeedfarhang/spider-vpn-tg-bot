@@ -3,7 +3,7 @@ import os
 import requests
 
 from api.webhook import notify_error
-from helpers.get_user_email import get_user_identity
+from helpers.get_user_identity import get_user_identity
 
 
 def bare_login(
@@ -42,7 +42,6 @@ def bare_signup(user_data: dict):
         os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
         + "/collections/users/records"
     )
-    print("user_data",user_data)
     try:
         response = requests.request(
             "POST",

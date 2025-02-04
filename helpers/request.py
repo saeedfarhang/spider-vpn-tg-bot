@@ -14,6 +14,7 @@ def request(
     headers: dict = {"content-type": "application/json"},
     user_id: str = None,
     call_webhook: bool = False,
+    effective_chat: any = None,
 ):
     """Call the backend API and return the response."""
     if call_webhook:
@@ -24,7 +25,14 @@ def request(
         base_url = os.environ.get("API_BASE_URL", "http://127.0.0.1:8090/api")
     url = f"{base_url}/{endpoint}"
     if user_id:
-        user_token = get_or_create_user_token(user_id)
+        if effective_chat:
+            user_token = get_or_create_user_token(
+                user_id,
+                tg_username=effective_chat.username,
+                full_name=effective_chat.full_name,
+            )
+        else:
+            user_token = get_or_create_user_token(user_id)
         headers_with_auth = {
             **headers,
             "Authorization": f"Bearer {user_token}",

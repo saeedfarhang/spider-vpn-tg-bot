@@ -70,13 +70,14 @@ async def inline_button_click(update: Update, context: ContextTypes.DEFAULT_TYPE
         selected_payment_gateway = None
     if callback_type == InlineButtonClickTypes.PLAN:
         selected_payment_gateway = None
-        if (int(callback_data.get("capacity", "0"))):
+        if int(callback_data.get("capacity", "0")):
             selected_payment_gateway = await select_plan(update, callback_data)
-        elif selected_payment_gateway is not None:
+        if selected_payment_gateway is not None:            
             callback_type = InlineButtonClickTypes.GATEWAY
     if callback_type == InlineButtonClickTypes.GATEWAY:
         if selected_payment_gateway is None:
             selected_payment_gateway = query.data["gateway"]
+        
         data = await create_order(update, callback_data, selected_payment_gateway)
         if data is not None:
             order_id = data["order"]["id"] if data else order_id
