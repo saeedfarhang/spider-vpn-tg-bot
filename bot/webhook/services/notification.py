@@ -3,16 +3,22 @@ from telegram.constants import ParseMode
 from telegram.ext import Application
 
 from api.order_approval import get_order_approvals
-from bot.messages import (COMPLETE_ORDER_HEAD_TEXT, CONNECTION_TUTORIAL_LINKS,
-                          DUPLICATE_TEST_ACCOUNT, ERROR_NOTIFICATIONS,
-                          EXPIRY_NOTIFICATION, NEW_ORDER_APPROVAL,
-                          ORDER_CREATED_WITHOUT_DATA, SERVERS_HEALTH_DETAIL,
-                          SERVERS_HEALTH_ERROR, SERVERS_HEALTH_TITLE)
+from bot.messages import (
+    COMPLETE_ORDER_HEAD_TEXT,
+    CONNECTION_TUTORIAL_LINKS,
+    DUPLICATE_TEST_ACCOUNT,
+    ERROR_NOTIFICATIONS,
+    EXPIRY_NOTIFICATION,
+    NEW_ORDER_APPROVAL,
+    ORDER_CREATED_WITHOUT_DATA,
+    SERVERS_HEALTH_DETAIL,
+    SERVERS_HEALTH_ERROR,
+    SERVERS_HEALTH_TITLE,
+)
 from helpers import logger
 from helpers.enums.inline_button_click_types import InlineButtonClickTypes
 from helpers.json_to_str import outline_config_json_to_str
-from helpers.keyboards import (connection_detail_keyboard,
-                               open_dashboard_keyboard)
+from helpers.keyboards import connection_detail_keyboard, open_dashboard_keyboard
 
 logger = logger(__name__)
 
@@ -22,7 +28,9 @@ async def send_vpn_config_deprecated_notification_to_user(
 ):
     try:
         await application.bot.send_message(
-            chat_id=user_id, text=EXPIRY_NOTIFICATION.format(order_id, 0, 0), parse_mode=ParseMode.MARKDOWN
+            chat_id=user_id,
+            text=EXPIRY_NOTIFICATION.format(order_id, 0, 0),
+            parse_mode=ParseMode.MARKDOWN,
         )
     except Exception as e:
         logger.error("Failed to send message: %s", e)
@@ -67,7 +75,9 @@ async def send_request_error_notification_to_user(
     application: Application, user_id: int, status: int
 ):
     await application.bot.send_message(
-        chat_id=user_id, text=ERROR_NOTIFICATIONS.get(str(status)), parse_mode=ParseMode.MARKDOWN
+        chat_id=user_id,
+        text=ERROR_NOTIFICATIONS.get(str(status)),
+        parse_mode=ParseMode.MARKDOWN,
     )
 
 

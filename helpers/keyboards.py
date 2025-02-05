@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 async def select_plan(update: Update, plan):
     selected_payment_gateway = None
     payment_gateways = get_gateway_payments(plan["id"])
+    
     if len(payment_gateways) == 1:
         selected_payment_gateway = payment_gateways[0]
     else:

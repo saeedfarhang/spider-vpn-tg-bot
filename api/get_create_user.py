@@ -1,4 +1,6 @@
 import logging
+import os
+
 from api.bare_auth import bare_login, bare_signup
 
 logging.basicConfig(
@@ -7,7 +9,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def get_create_user_token(tg_user_id: str) -> str:
+def get_create_user_token(
+    tg_user_id: str, tg_username: str | None, full_name: str | None
+) -> str:
     """
     This function retrieves or creates a user token based on a Telegram user's information.
 
@@ -16,19 +20,23 @@ def get_create_user_token(tg_user_id: str) -> str:
     :return: The function `get_create_user_token` returns the authentication token retrieved from the
     login process for the given Telegram user (`tg_user`).
     """
-    token = bare_login(str(tg_user_id), "test12332232test")
-    print(token)
+    default_pass = os.environ.get("DEFAULT_PASS", None)
+    if not default_pass:
+        logger.error("DEFAULT_PASS not found in the environment")
+        return None
+    token = bare_login(str(tg_user_id), default_pass)
+    print("\ntoken", token)
     if token:
         logger.info("token retrieves by login %s", token)
     else:
         user_data = {
-            "username": str(tg_user_id),
             "tg_id": str(tg_user_id),
-            "tg_username": str(tg_user_id),
-            "password": "test12332232test",
-            "passwordConfirm": "test12332232test",
+            "tg_username": tg_username,
+            "full_name": full_name,
+            "password": default_pass,
+            "passwordConfirm": default_pass,
         }
         bare_signup(user_data)
-        token = bare_login(str(tg_user_id), "test12332232test")
+        token = bare_login(str(tg_user_id), default_pass)
 
     return token["token"]

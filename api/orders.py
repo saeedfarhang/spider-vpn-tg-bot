@@ -1,11 +1,12 @@
 from telegram import Update
+
 from api.users import get_user
 from helpers import request
 
 
 async def create_order(update: Update, plan, selected_payment_gateway):
     user_id = update.effective_chat.id
-    user = get_user(update.effective_chat.id, user_id)
+    user = get_user(update.effective_chat.id, user_id, update.effective_chat)
     order_data = {
         "user": user["id"],
         "plan": plan["id"],
