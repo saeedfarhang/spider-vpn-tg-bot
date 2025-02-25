@@ -63,7 +63,7 @@ async def send_vpn_config_to_user(application: Application, user_id, order):
             parse_mode=ParseMode.MARKDOWN,
         )
     except Exception as e:
-        logger.error("Failed to send message: %s", e)
+        logger.log("Failed to send message: %s", e)
         await application.bot.send_message(
             chat_id=user_id,
             text=ORDER_CREATED_WITHOUT_DATA,

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 def get_create_user_token(
     tg_user_id: str, tg_username: str | None, full_name: str | None
-) -> str:
+) -> str|None:
     """
     This function retrieves or creates a user token based on a Telegram user's information.
 
