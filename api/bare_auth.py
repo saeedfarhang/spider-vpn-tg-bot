@@ -15,7 +15,6 @@ def bare_login(
         + "/collections/users/auth-with-password"
     )
     auth_data = {"identity": get_user_identity(identity), "password": password}
-    print("auth_data", auth_data)
     try:
         response = requests.request(
             "POST",
@@ -26,9 +25,16 @@ def bare_login(
         )
     except requests.exceptions.RequestException as e:
         notify_error(identity, 500)
-        print(f"API request failed: {e}")
+        print(f"API request failed with request exception: {e}")
         return None
-    res = response.json()
+    except Exception as e:
+        print(f"API request failed: {e}")
+
+    try:
+        res = response.json()
+    except Exception as e:
+        print(f"response unfetchable: {e}\nresponse: {response}")
+        return None
     if res.get("token", None) is not None:
         return res
     status = res.get("status", 0)
