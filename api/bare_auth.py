@@ -35,6 +35,8 @@ def bare_login(
     except Exception as e:
         print(f"response unfetchable: {e}\nresponse: {response}")
         return None
+    print(response)
+    res = response.json()
     if res.get("token", None) is not None:
         return res
     status = res.get("status", 0)
