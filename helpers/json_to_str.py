@@ -4,13 +4,11 @@ from bot.messages import CONFIG_DETAIL_FOR_CLIENT
 from helpers.create_ssconf_url import create_ssconf_url
 from helpers.parse_date_string import parse_date_string
 
-
 def outline_config_json_to_str(text: str, order_data: dict):
-    print("\n\n\n", parse_date_string(order_data["expand"]["vpn_config"]["start_date"]))
     try:
         vpn_config = order_data["expand"]["vpn_config"]
         connection_data = vpn_config["connection_data"]
-        access_url = create_ssconf_url(vpn_config["id"])
+        access_url = create_ssconf_url(order_data['id'])
         name = connection_data.get("name", "N/A")
         start_date = parse_date_string(vpn_config.get("start_date", "N/A"))
         end_date = parse_date_string(vpn_config.get("end_date", "N/A"))
