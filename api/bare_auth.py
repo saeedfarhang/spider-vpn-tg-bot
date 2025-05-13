@@ -28,6 +28,7 @@ def bare_login(
         notify_error(identity, 500)
         print(f"API request failed: {e}")
         return None
+    print(response)
     res = response.json()
     if res.get("token", None) is not None:
         return res

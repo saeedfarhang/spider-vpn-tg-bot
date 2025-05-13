@@ -47,10 +47,25 @@ def get_my_orders_by_status(status: str, user_id):
     )
     return res.get("items", [])
 
-
 def get_gateway_payments(plan_id) -> list:
+    # Step 1: Get plans_pricing records that match the given plan_id
+    pricing_links = request(
+        f"collections/plans_pricing/records?filter=(plan='{plan_id}')",
+        method="GET"
+    )["items"]
+
+    # Step 2: Extract the unique gateway IDs from the matching records
+    gateway_ids = set(p["gateway"] for p in pricing_links)
+
+    if not gateway_ids:
+        return []
+
+    # Step 3: Query payment_gateway records using the gateway IDs
+    # Build a filter like: (id='id1' || id='id2' || ...)
+    filter_expr = " || ".join([f"(id='{gid}')" for gid in gateway_ids])
     gateways = request(
-        f"collections/payment_gateway/records?expand=plans_pricing_via_gateway&filter=(plans_pricing_via_gateway.plan='{plan_id}')",
-        method="GET",
+        f"collections/payment_gateway/records?filter={filter_expr}&expand=plans_pricing_via_gateway",
+        method="GET"
     )
+
     return gateways["items"]
